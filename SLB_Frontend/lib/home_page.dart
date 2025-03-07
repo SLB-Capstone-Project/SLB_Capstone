@@ -13,8 +13,8 @@ class HomePageState extends State<HomePage> {
   List<String> historyList = <String>['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5', 'Item 6', 'Item 7', 'Item 8', 'Item 9', 'Item 10'];
 
   void check_in(String text) {
-    //int timestamp = DateTime.now().millisecondsSinceEpoch;
-    //DateTime time = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    int timestamp = DateTime.now().millisecondsSinceEpoch;
+    DateTime time = DateTime.fromMillisecondsSinceEpoch(timestamp);
     //final dateFormatter = DateFormat('yyyy-MM-dd');
     //final formattedDate = dateFormatter.format(time);
     //print(formattedDate);
@@ -33,7 +33,7 @@ class HomePageState extends State<HomePage> {
         backgroundColor: Colors.brown,
         toolbarHeight: 60.0,
         titleTextStyle: const TextStyle(
-          fontSize: 30.0,
+          fontSize: 32.0,
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
@@ -154,22 +154,26 @@ class HistoryCard extends StatelessWidget {
     //  borderRadius: BorderRadius.circular(20.0),
     return Container( 
       height: 60,
+      //padding: EdgeInsets.all(8.0),
       //width: 300,
-      child: Card(  
+      child: Card.outlined(  
         //margin: EdgeInsets.zero,
-        color: Colors.brown,
-        child: Row( 
-          children: [  
-            //Text('Check in'),
-            Text(
-              tileString, 
-              style: TextStyle(  
-                color: Colors.white,
-                
+        color: Colors.black,
+        child: Container(  
+          padding: EdgeInsets.all(8.0),
+          child: Row( 
+            children: [  
+              //Text('Check in'),
+              Text(
+                tileString, 
+                style: TextStyle(  
+                  color: Colors.white,
+                  
+                ),
               ),
-            ),
-            //Text('Date: $date')
-          ],
+              //Text('Date: $date')
+            ],
+          ),
         ),
       )
     );
@@ -189,12 +193,24 @@ class InventoryState extends State<Inventory> {
   Widget build(BuildContext context) {
     return Scaffold(  
       appBar: AppBar(  
+        title: Text('Inventory'),
+        backgroundColor: Colors.brown,
+        toolbarHeight: 60.0,
+        titleTextStyle: const TextStyle(
+          fontSize: 32.0,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
         leading: IconButton(  
           icon: const Icon(Icons.home),
-          onPressed: () { Navigator.pop(context); }
+          color: Colors.white,
+          onPressed: () {
+            Navigator.pop(context);
+          }
         ),
-        title: Text('Return Home'),
-        backgroundColor: const Color.fromARGB(255, 183, 162, 227),
+      ),
+      body: Container (  
+        color: Colors.black,
       ),
     );
   }

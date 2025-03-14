@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 //import 'package:camera/camera.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
 
+
 class CheckInPage extends StatefulWidget {
   const CheckInPage({super.key});
 
@@ -42,6 +43,7 @@ class _CheckInPageState extends State<CheckInPage> {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
+
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const SizedBox(height: 16.0),
@@ -54,6 +56,7 @@ class _CheckInPageState extends State<CheckInPage> {
                 backgroundColor: Colors.white10,
                 foregroundColor: Colors.purple,
               ),
+
               onPressed: () {},
             ),
 
@@ -91,6 +94,7 @@ class _CheckInPageState extends State<CheckInPage> {
             //     ),
             //   ),
             // ),
+
             ElevatedButton(
               onPressed: scanBarcode,
               style: ElevatedButton.styleFrom(
@@ -102,6 +106,7 @@ class _CheckInPageState extends State<CheckInPage> {
                 ),
               ),
               child: const Text('Start scanning barcode'),
+
             ),
 
             // two buttons
@@ -115,7 +120,9 @@ class _CheckInPageState extends State<CheckInPage> {
                     foregroundColor: Colors.white,
                     minimumSize: const Size(120, 48),
                   ),
+
                   onPressed: () {},
+
                   child: const Text('Cancel'),
                 ),
                 // Scan Button
@@ -125,7 +132,9 @@ class _CheckInPageState extends State<CheckInPage> {
                     foregroundColor: Colors.white,
                     minimumSize: const Size(120, 48),
                   ),
+
                   onPressed: () {},
+
                   child: const Text('Scan'),
                 ),
               ],
@@ -137,4 +146,6 @@ class _CheckInPageState extends State<CheckInPage> {
       ),
     );
   }
+
 }
+

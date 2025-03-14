@@ -5,11 +5,13 @@ import 'camera_page.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
-  @override
+
+  @override 
   State<HomePage> createState() => HomePageState();
 }
 
 class HomePageState extends State<HomePage> {
+
   List<String> historyList = <String>[
     'Item 1',
     'Item 2',
@@ -22,6 +24,7 @@ class HomePageState extends State<HomePage> {
     'Item 9',
     'Item 10',
   ];
+
 
   void check_in(String text) {
     int timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -95,6 +98,7 @@ class HomePageState extends State<HomePage> {
                   ),
                 ),
                 SizedBox(
+
                   width: 100,
                   height: 50,
                   child: FloatingActionButton(
@@ -140,15 +144,16 @@ class HistoryWindow extends StatelessWidget {
           clipBehavior: Clip.hardEdge,
           slivers: <Widget>[
             SliverList(
-              delegate: SliverChildBuilderDelegate((
-                BuildContext context,
-                int index,
-              ) {
-                return HistoryCard(tileString: historyList[index]);
-              }, childCount: historyList.length),
+
+              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                  return HistoryCard(tileString: historyList[index]);
+                }, 
+                childCount: historyList.length,
+              ),
             ),
           ],
-        ),
+        )
+
       ),
     );
   }
@@ -176,6 +181,7 @@ class HistoryCard extends StatelessWidget {
             children: [
               //Text('Check in'),
               Text(tileString, style: TextStyle(color: Colors.white)),
+
               //Text('Date: $date')
             ],
           ),

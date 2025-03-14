@@ -7,6 +7,7 @@ import 'login_screen.dart';
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
+
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
 }
@@ -19,6 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscureConfirmPassword = true;
 
   void _togglePasswordVisibility() {
+
     setState(() => _obscurePassword = !_obscurePassword);
   }
 
@@ -73,12 +75,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
         SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
       );
     }
+
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       backgroundColor: Colors.black,
+
       body: Center(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 30),
@@ -86,7 +91,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               Text("Register", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+
               SizedBox(height: 5),
               Row(
                 children: [
@@ -113,10 +120,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ],
               ),
               SizedBox(height: 20),
+
               TextField(
                 controller: emailController,
                 style: TextStyle(color: Colors.white),
                 decoration: InputDecoration(
+
                   labelText: "Email",
                   labelStyle: TextStyle(color: Colors.white70),
                   filled: true, fillColor: Colors.grey[900],
@@ -124,6 +133,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
               SizedBox(height: 20),
+
               TextField(
                 controller: passwordController,
                 obscureText: _obscurePassword,
@@ -131,15 +141,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 decoration: InputDecoration(
                   labelText: "Password",
                   labelStyle: TextStyle(color: Colors.white70),
+
                   filled: true, fillColor: Colors.grey[900],
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
                   suffixIcon: IconButton(
                     icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: Colors.white70),
+
                     onPressed: _togglePasswordVisibility,
                   ),
                 ),
               ),
               SizedBox(height: 20),
+
               TextField(
                 controller: confirmPasswordController,
                 obscureText: _obscureConfirmPassword,
@@ -147,15 +160,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 decoration: InputDecoration(
                   labelText: "Confirm Password",
                   labelStyle: TextStyle(color: Colors.white70),
+
                   filled: true, fillColor: Colors.grey[900],
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
                   suffixIcon: IconButton(
                     icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility, color: Colors.white70),
+
                     onPressed: _toggleConfirmPasswordVisibility,
                   ),
                 ),
               ),
               SizedBox(height: 20),
+
               SizedBox(
                 width: double.infinity, // Make it take full width
                 height: 50, // Increase height for a better appearance
@@ -186,3 +202,4 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 }
+

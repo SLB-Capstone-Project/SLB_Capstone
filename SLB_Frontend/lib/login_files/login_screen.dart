@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import '../home_page.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -14,6 +16,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
   bool _obscurePassword = true;
 
   void _togglePasswordVisibility() {
@@ -60,12 +63,15 @@ class _LoginScreenState extends State<LoginScreen> {
         SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
       );
     }
+
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       backgroundColor: Colors.black,
+
       body: Center(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 30),
@@ -73,7 +79,9 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               Text("Login", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+
               SizedBox(height: 5),
               Row(
                 children: [
@@ -100,10 +108,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
               SizedBox(height: 20),
+
+
               TextField(
                 controller: emailController,
                 style: TextStyle(color: Colors.white),
                 decoration: InputDecoration(
+
                   labelText: "Email",
                   labelStyle: TextStyle(color: Colors.white70),
                   filled: true, fillColor: Colors.grey[900],
@@ -111,6 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               SizedBox(height: 20),
+
               TextField(
                 controller: passwordController,
                 obscureText: _obscurePassword,
@@ -118,14 +130,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   labelText: "Password",
                   labelStyle: TextStyle(color: Colors.white70),
+
                   filled: true, fillColor: Colors.grey[900],
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
                   suffixIcon: IconButton(
                     icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: Colors.white70),
+
                     onPressed: _togglePasswordVisibility,
                   ),
                 ),
               ),
+
               SizedBox(height: 20),
               SizedBox(
                 width: double.infinity, // Make it full width
@@ -157,3 +172,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+

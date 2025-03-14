@@ -49,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
 
         // Navigate to HomePage after a successful login
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => HomePage()),
         );

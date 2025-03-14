@@ -4,7 +4,7 @@ import 'package:barcode_scan2/barcode_scan2.dart';
 
 
 class CheckInPage extends StatefulWidget {
-  const CheckInPage({Key? key}) : super(key: key);
+  const CheckInPage({super.key});
 
   @override
   State<CheckInPage> createState() => _CheckInPageState();
@@ -56,9 +56,8 @@ class _CheckInPageState extends State<CheckInPage> {
                 backgroundColor: Colors.white10,
                 foregroundColor: Colors.purple,
               ),
-              onPressed: () {
 
-              },
+              onPressed: () {},
             ),
 
             // // empty container for camera feed
@@ -98,12 +97,16 @@ class _CheckInPageState extends State<CheckInPage> {
 
             ElevatedButton(
               onPressed: scanBarcode,
-              child: const Text('Start scanning barcode'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.purple,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
+              child: const Text('Start scanning barcode'),
+
             ),
 
             // two buttons
@@ -117,9 +120,9 @@ class _CheckInPageState extends State<CheckInPage> {
                     foregroundColor: Colors.white,
                     minimumSize: const Size(120, 48),
                   ),
-                  onPressed: () {
 
-                  },
+                  onPressed: () {},
+
                   child: const Text('Cancel'),
                 ),
                 // Scan Button
@@ -129,9 +132,9 @@ class _CheckInPageState extends State<CheckInPage> {
                     foregroundColor: Colors.white,
                     minimumSize: const Size(120, 48),
                   ),
-                  onPressed: () {
 
-                  },
+                  onPressed: () {},
+
                   child: const Text('Scan'),
                 ),
               ],
@@ -143,4 +146,6 @@ class _CheckInPageState extends State<CheckInPage> {
       ),
     );
   }
+
 }
+

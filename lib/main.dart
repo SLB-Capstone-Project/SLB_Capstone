@@ -201,63 +201,65 @@ class CheckInPage extends StatefulWidget {
 
 class _CheckInPageState extends State<CheckInPage> {
   String scannedBarcode = 'not scanned yet';
+  String scanResultMessage = '';
+  Color scanResultColor = Colors.transparent;
 
-  // Function to scan barcode using camera
   Future<void> scanBarcode() async {
     try {
       var result = await barcode_scan.BarcodeScanner.scan();
       setState(() {
         scannedBarcode = result.rawContent;
       });
-      await sendPostRequest(scannedBarcode);
+      await processBarcode(scannedBarcode);
     } catch (e) {
       setState(() {
-        scannedBarcode = 'scan error: $e';
+        scanResultMessage = 'Scan error: $e';
+        scanResultColor = Colors.red;
       });
     }
   }
 
-  // Function to scan barcode from an image file (fixed using ML Kit)
   Future<void> scanBarcodeFromImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      try {
-        final inputImage = mlkit.InputImage.fromFilePath(pickedFile.path);
-        final barcodeScanner = mlkit.BarcodeScanner();
-        final List<mlkit.Barcode> barcodes = await barcodeScanner.processImage(inputImage);
-
-        if (barcodes.isNotEmpty) {
-          setState(() {
-            scannedBarcode = barcodes.first.rawValue ?? 'No barcode found';
-          });
-          await sendPostRequest(scannedBarcode);
-        } else {
-          setState(() {
-            scannedBarcode = 'No barcode detected';
-          });
-        }
-
-        barcodeScanner.close();
-      } catch (e) {
-        setState(() {
-          scannedBarcode = 'scan error: $e';
-        });
-      }
-    }
+    // 暂时清空功能
+    setState(() {
+      scanResultMessage = 'Scan from image is currently unavailable';
+      scanResultColor = Colors.red;
+    });
   }
 
-  // Function to send scanned barcode via POST request
-  Future<void> sendPostRequest(String barcode) async {
-    final url = Uri.parse('https://ptsv3.com/t/22322/');
+  Future<void> processBarcode(String barcode) async {
+    if (barcode.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(barcode)) {
+      setState(() {
+        scanResultMessage = 'Invalid barcode: must be 10 digits';
+        scanResultColor = Colors.red;
+      });
+      return;
+    }
+
+    String categoryId = barcode.substring(0, 4);
+    String componentId = barcode.substring(4);
+
+    int categoryIdNum = int.parse(categoryId);
+    int componentIdNum = int.parse(componentId);
+
+    await sendPostRequest(categoryIdNum, componentIdNum);
+
+    setState(() {
+      scanResultMessage = 'Scan correct';
+      scanResultColor = Colors.green;
+    });
+  }
+
+  Future<void> sendPostRequest(int categoryId, int componentId) async {
+    final url = Uri.parse('http://172.191.111.81:8081/');
     final response = await http.post(
       url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: jsonEncode(<String, String>{
-        'barcode': barcode,
+      body: jsonEncode(<String, int>{
+        'category_id': categoryId,
+        'component_id': componentId,
       }),
     );
 
@@ -265,18 +267,6 @@ class _CheckInPageState extends State<CheckInPage> {
       print('POST request successful');
     } else {
       print('Failed to send POST request');
-    }
-  }
-
-  // Function to fetch stored barcode data (GET request)
-  Future<void> sendGetRequest() async {
-    final url = Uri.parse('https://ptsv3.com/t/22322/');
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      print('GET request successful: ${response.body}');
-    } else {
-      print('Failed to send GET request');
     }
   }
 
@@ -320,6 +310,14 @@ class _CheckInPageState extends State<CheckInPage> {
               ),
             ),
 
+            Text(
+              scanResultMessage,
+              style: TextStyle(
+                color: scanResultColor,
+                fontSize: 16.0,
+              ),
+            ),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -359,7 +357,6 @@ class _CheckInPageState extends State<CheckInPage> {
   }
 }
 
-// Manual input page for barcode entry
 class ManualInputPage extends StatefulWidget {
   @override
   _ManualInputPageState createState() => _ManualInputPageState();
@@ -367,16 +364,19 @@ class ManualInputPage extends StatefulWidget {
 
 class _ManualInputPageState extends State<ManualInputPage> {
   final TextEditingController _barcodeController = TextEditingController();
+  String scanResultMessage = '';
+  Color scanResultColor = Colors.transparent;
 
-  Future<void> sendPostRequest(String barcode) async {
-    final url = Uri.parse('https://ptsv3.com/t/22322/');
+  Future<void> sendPostRequest(int categoryId, int componentId) async {
+    final url = Uri.parse('http://172.191.111.81:8081/');
     final response = await http.post(
       url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: jsonEncode(<String, String>{
-        'barcode': barcode,
+      body: jsonEncode(<String, int>{
+        'category_id': categoryId,
+        'component_id': componentId,
       }),
     );
 
@@ -387,11 +387,41 @@ class _ManualInputPageState extends State<ManualInputPage> {
     }
   }
 
+  void processManualInput() {
+    final barcode = _barcodeController.text;
+    if (barcode.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(barcode)) {
+      setState(() {
+        scanResultMessage = 'Invalid barcode: must be 10 digits';
+        scanResultColor = Colors.red;
+      });
+      return;
+    }
+
+    String categoryId = barcode.substring(0, 4);
+    String componentId = barcode.substring(4);
+
+    int categoryIdNum = int.parse(categoryId);
+    int componentIdNum = int.parse(componentId);
+
+    sendPostRequest(categoryIdNum, componentIdNum);
+
+    setState(() {
+      scanResultMessage = 'Scan correct';
+      scanResultColor = Colors.green;
+    });
+
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manual Input'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -404,17 +434,20 @@ class _ManualInputPageState extends State<ManualInputPage> {
                 labelText: 'Enter Barcode',
                 border: OutlineInputBorder(),
               ),
+              keyboardType: TextInputType.number,
+              maxLength: 10,
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                final barcode = _barcodeController.text;
-                if (barcode.isNotEmpty) {
-                  sendPostRequest(barcode);
-                  Navigator.pop(context);
-                }
-              },
+              onPressed: processManualInput,
               child: const Text('Confirm'),
+            ),
+            Text(
+              scanResultMessage,
+              style: TextStyle(
+                color: scanResultColor,
+                fontSize: 16.0,
+              ),
             ),
           ],
         ),

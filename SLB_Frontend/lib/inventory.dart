@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'tabbed_page.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -38,6 +39,7 @@ class InventoryPage extends StatefulWidget {
 }
 
 class _InventoryPageState extends State<InventoryPage> {
+
   List<String> history_arr = [];
   bool logout = false;
 
@@ -67,6 +69,12 @@ class _InventoryPageState extends State<InventoryPage> {
               },
               separatorBuilder: (BuildContext context, int index) => const Divider(),
             ),
+          ),
+          FloatingActionButton(  
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const MyTabbedPage()));
+            },
+            child: Text('tabbed inventory'),
           ),
           //FloatingActionButton(
           //  heroTag: null,  

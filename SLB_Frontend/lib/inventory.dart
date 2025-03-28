@@ -1,34 +1,62 @@
 import 'package:flutter/material.dart';
 import 'tabbed_page.dart';
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'globals.dart' as global;
 
 Future<List<String>> getData() async {
     List<String> string_arr = [];
+    final String sendUrl = 'http://172.191.111.81:8081/api/components/101';
+    String token = global.token;
+    print(token);
     final response = await http.get(  
-      Uri.parse('http://ptsv3.com/t/afeafaefaef/post/')
+      Uri.parse(sendUrl),
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      }
     );
-    if(response.statusCode == 200) {
+    print(response.statusCode);
+    print(response.body);
+    /*if(response.statusCode == 200) {
       string_arr = response.body.split('\n');
+      //print(string_arr);
       //print(string_arr.length);
       //print(string_arr[3]);
     }
     else {
+      print(response.statusCode);
       throw Exception('Unable to connect');
-    }
+    }*/
     //setState(() {});
     return string_arr;
   }
 
 Future<void> sendData(String data) async {
   //const string = 'temp temp temp';
+  //Map<String, String> headers = {"Content-Type": "application/json"};
+  final String sendUrl = 'http://172.191.111.81:8081/api/components';
   final response = await http.post(  
-    Uri.parse('http://ptsv3.com/t/afeafaefaef/post/'),
-    body: data,
+    //Uri.parse('http://ptsv3.com/t/afeafaefaef/post/'),
+    Uri.parse(sendUrl),
+    headers: {HttpHeaders.authorizationHeader: 'eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyTmFtZSI6IkFkbWluIiwiZXhwIjoxNzQzMTE1NTE2fQ.6hlGpXVCPyCZdaeueBm98fdFC5jbRgT6TOZJUg7XJ1Q', 'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'productsId': 0, 
+      'category': 0,
+      'status': 'available'
+    })
   );
-  if(response.statusCode != 200) {
+  /*if(response.statusCode != 200) {
+    print(response.statusCode);
     throw Exception('Unable to connect');
   }
+  else {
+    print(response.statusCode);
+  }*/
+  print(response.statusCode);
+  print(response.body);
+
 }
 
 class InventoryPage extends StatefulWidget {
@@ -44,13 +72,13 @@ class _InventoryPageState extends State<InventoryPage> {
   bool logout = false;
 
   @override 
-  void initState() {
+  /*void initState() {
     super.initState();
     getData().then((List<String> result) {
       history_arr = result;
       setState(() {});
     });
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -76,21 +104,21 @@ class _InventoryPageState extends State<InventoryPage> {
             },
             child: Text('tabbed inventory'),
           ),
-          //FloatingActionButton(
-          //  heroTag: null,  
-           // onPressed: () async {
-            //  history_arr = await getData();
-             // setState(() {});
-            //},
-            //child: Text("get Data"),
-         // ),
-          //FloatingActionButton(  
-         //  heroTag: null,
-          //  onPressed: () {
-              //sendData();
-           // },
-           // child: Text('Send Data')
-         // )
+          FloatingActionButton(
+            heroTag: null,  
+            onPressed: () async {
+              history_arr = await getData();
+              setState(() {});
+            },
+            child: Text("get Data"),
+          ),
+          FloatingActionButton(  
+           heroTag: null,
+            onPressed: () {
+              sendData("temp");
+            },
+            child: Text('Send Data')
+          )
         ]
       )
     );

@@ -37,18 +37,18 @@ packages:
     dependency: transitive
     description:
       name: camera_android_camerax
-      sha256: afdea63d66cce01cee6d56443a9d62f10dd58678c403cec78affff6fb52c6482
+      sha256: "13784f539c7f104766bff84e4479a70f03b29d78b208278be45c939250d9d7f5"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.14"
+    version: "0.6.14+1"
   camera_avfoundation:
     dependency: transitive
     description:
       name: camera_avfoundation
-      sha256: "1eeb9ce7c9a397e312343fd7db337d95f35c3e65ad5a62ff637c8abce5102b98"
+      sha256: ba48b65a3a97004276ede882e6b838d9667642ff462c95a8bb57ca8a82b6bd25
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.18+8"
+    version: "0.9.18+11"
   camera_platform_interface:
     dependency: transitive
     description:
@@ -97,7 +97,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.4+2"
-
   crypto:
     dependency: "direct main"
     description:
@@ -106,7 +105,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.6"
-
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -115,7 +113,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
-
   dio:
     dependency: "direct main"
     description:
@@ -132,7 +129,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
-
   fake_async:
     dependency: transitive
     description:
@@ -174,10 +170,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_plugin_android_lifecycle
-      sha256: "615a505aef59b151b46bbeef55b36ce2b6ed299d160c51d84281946f0aa0ce0e"
+      sha256: "5a1e6fb2c0561958d7e4c33574674bda7b77caaca7a33b758876956f2902eea3"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.24"
+    version: "2.0.27"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -188,7 +184,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-
   http:
     dependency: "direct main"
     description:
@@ -205,7 +200,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
-
   intl:
     dependency: "direct main"
     description:
@@ -274,10 +268,10 @@ packages:
     dependency: "direct main"
     description:
       name: mobile_scanner
-      sha256: "91d28b825784e15572fdc39165c5733099ce0e69c6f6f0964ebdbf98a62130fd"
+      sha256: "9cb9e371ee9b5b548714f9ab5fd33b530d799745c83d5729ecd1e8ab2935dbd1"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.6"
+    version: "6.0.7"
   path:
     dependency: "direct main"
     description:
@@ -298,10 +292,10 @@ packages:
     dependency: transitive
     description:
       name: path_provider_android
-      sha256: "4adf4fd5423ec60a29506c76581bc05854c55e3a0b72d35bb28d661c9686edf2"
+      sha256: "0ca7359dad67fd7063cb2892ab0c0737b2daafd807cf1acecd62374c8fae6c12"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.15"
+    version: "2.2.16"
   path_provider_foundation:
     dependency: transitive
     description:
@@ -419,7 +413,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.4"
-
   typed_data:
     dependency: transitive
     description:
@@ -428,7 +421,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
-
   vector_math:
     dependency: transitive
     description:

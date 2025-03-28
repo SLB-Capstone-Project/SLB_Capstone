@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 class MyTabbedPage extends StatefulWidget {
   const MyTabbedPage({ super.key });
   @override
@@ -12,7 +13,8 @@ class _MyTabbedPageState extends State<MyTabbedPage> with SingleTickerProviderSt
     Tab(text: 'Products'),
   ];
 
-  List<String> history_arr = ['product 1', 'product 2', 'product 3', 'product 4'];
+  List<String> part_arr = ['part 1', 'part 2', 'part 3', 'part 4'];
+  List<String> product_arr = ['product 1', 'product 2'];
   
   late TabController _tabController;
 
@@ -22,11 +24,11 @@ class _MyTabbedPageState extends State<MyTabbedPage> with SingleTickerProviderSt
     _tabController = TabController(vsync: this, length: myTabs.length);
   }
 
- @override
- void dispose() {
-   _tabController.dispose();
-   super.dispose();
- }
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }  
 
   @override
   Widget build(BuildContext context) {
@@ -40,19 +42,30 @@ class _MyTabbedPageState extends State<MyTabbedPage> with SingleTickerProviderSt
       ),
       body: TabBarView(
         controller: _tabController,
-        children: myTabs.map((Tab tab) {
-          final String label = tab.text!.toLowerCase();
-          return Center(
+        children: [ 
+          //myTabs.map((Tab tab) {
+          //final String label = tab.text!.toLowerCase();
+          Container(
             child: ListView.separated(
               padding: const EdgeInsets.all(8),
-              itemCount: history_arr.length,
+              itemCount: part_arr.length,
               itemBuilder: (BuildContext context, int index) {
-                return ListTile(leading: Text(history_arr[index]));
+                return ListTile(leading: Text(part_arr[index]));
               },
               separatorBuilder: (BuildContext context, int index) => const Divider(),
             ),
-          );
-        }).toList(),
+          ),
+          Container (  
+            child: ListView.separated(  
+              padding: const EdgeInsets.all(8),
+              itemCount: product_arr.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(leading: Text(product_arr[index]));
+              },
+              separatorBuilder: (BuildContext context, int index) => const Divider(),
+            ),
+          ),
+        ],
       ),
     );
   }

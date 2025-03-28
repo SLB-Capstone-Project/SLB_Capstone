@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'register_screen.dart';
 import '../home_page.dart';
+import '../globals.dart' as globals;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -31,18 +32,25 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final String apiUrl = "https://ptsv3.com/t/slb_login/";
+    final String apiUrl = "http://172.191.111.81:8081/login";
 
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "email": emailController.text,
-          "password": passwordController.text,
+          //"username": emailController.text,
+          //"password": passwordController.text,
+          "employee_name": "Admin",
+          "password": "123456",
         }),
       );
+      print(response.statusCode);
+      print(response.body);
+      var string = jsonDecode(response.body);
 
+      globals.token = string['data'];
+      //print(globals.token);
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Login Successful! Redirecting to HomePage.")),

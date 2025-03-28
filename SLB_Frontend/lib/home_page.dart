@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'camera_page.dart';
 import 'inventory.dart';
+import 'tabbed_inventory.dart';
 //import 'package:http/http.dart';
 //import 'login_files/login_screen.dart';
 
@@ -44,7 +45,7 @@ class HomePageState extends State<HomePage> {
           color: Colors.white,
           onPressed: () async {
             //getData();
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const Inventory()));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const TabbedInventory()));
           }
         ),
       ),
@@ -212,7 +213,7 @@ class InventoryState extends State<Inventory> {
           }
         ),
       ),
-      body: InventoryPage(),
+      body: TabbedInventory(),
     );
   }
 }

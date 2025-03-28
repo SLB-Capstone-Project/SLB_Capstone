@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'tabbed_page.dart';
+import 'tabbed_inventory.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -7,7 +7,7 @@ import 'globals.dart' as global;
 
 Future<List<String>> getData() async {
     List<String> string_arr = [];
-    final String sendUrl = 'http://172.191.111.81:8081/api/components/101';
+    final String sendUrl = 'http://172.191.111.81:8081/api/categories';
     String token = global.token;
     print(token);
     final response = await http.get(  
@@ -17,10 +17,21 @@ Future<List<String>> getData() async {
         'Content-Type': 'application/json',
       }
     );
-    print(response.statusCode);
+    //print(response.statusCode);
     print(response.body);
-    /*if(response.statusCode == 200) {
-      string_arr = response.body.split('\n');
+    if(response.statusCode == 200) {
+      List temp =  jsonDecode(response.body);
+      print(temp);
+      //string_arr = temp.cast<String>();
+       for(int i = 0; i < temp.length; i++) {
+        string_arr.add("Product ID: ${temp[i]['productId']} \n In Stock: ${temp[i]['numberPartCheckOut']}");
+        print(temp[i]['productId']);
+        print(temp[i]);
+      }
+      //print(temp[2]);
+      //print(temp[3]);
+  
+      //string_arr = response.body.split('\n');
       //print(string_arr);
       //print(string_arr.length);
       //print(string_arr[3]);
@@ -28,10 +39,48 @@ Future<List<String>> getData() async {
     else {
       print(response.statusCode);
       throw Exception('Unable to connect');
-    }*/
+    }
     //setState(() {});
     return string_arr;
   }
+
+
+Future<List<String>> getnameData() async {
+    List<String> string_arr = [];
+    final uri = Uri.http('172.191.111.81:8081', '/api/categories', {'name': 'Admin'});
+    //final uri = Uri.http('172.191.111.81:8081', '/api/categories');
+    String token = global.token;
+    //print(token);
+    final response = await http.get(  
+      uri,
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      }
+    );
+    //print(response.statusCode);
+    print(response.body);
+    if(response.statusCode == 200) {
+      List temp = List<String>.from(jsonDecode(response.body));
+      print(temp.length);
+      for(int i = 0; i < temp.length; i++) {
+        print(temp[i]);
+      }
+  
+      //string_arr = response.body.split('\n');
+      //print(string_arr);
+      //print(string_arr.length);
+      //print(string_arr[3]);
+    }
+    else {
+      print(response.statusCode);
+      throw Exception('Unable to connect');
+    }
+    //setState(() {});
+    return string_arr;
+  }
+
+
 
 Future<void> sendData(String data) async {
   //const string = 'temp temp temp';
@@ -100,7 +149,7 @@ class _InventoryPageState extends State<InventoryPage> {
           ),
           FloatingActionButton(  
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const MyTabbedPage()));
+              //Navigator.push(context, MaterialPageRoute(builder: (context) => const MyTabbedPage()));
             },
             child: Text('tabbed inventory'),
           ),
@@ -118,6 +167,13 @@ class _InventoryPageState extends State<InventoryPage> {
               sendData("temp");
             },
             child: Text('Send Data')
+          ),
+          FloatingActionButton(  
+           heroTag: null,
+            onPressed: () {
+              getnameData();
+            },
+            child: Text('get name Data')
           )
         ]
       )

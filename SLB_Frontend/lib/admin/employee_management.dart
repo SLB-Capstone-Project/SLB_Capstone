@@ -60,9 +60,9 @@ class _EmployeePageState extends State<EmployeePage> {
               responseBody["data"].map((employee) {
                 return {
                   'id': employee['employee_id'].toString(),
-                  'name': employee['username'] ?? 'No Name',
+                  'name': employee['employee_name'] ?? 'No Name',
                   'department': employee['department'] ?? 'No Department',
-                  'type': employee['manager'] ?? 'Regular User',
+                  'type': employee['user_type'] ?? 'Regular User',
                 };
               }).toList();
         });

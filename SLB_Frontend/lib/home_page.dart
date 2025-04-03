@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:namer_app/login_files/login_screen.dart';
 import 'camera_page.dart';
 import 'inventory.dart';
 import 'tabbed_inventory.dart';
 import 'admin/admin_main.dart';
+import "globals.dart" as globals;
 //import 'package:http/http.dart';
 //import 'login_files/login_screen.dart';
 
@@ -124,7 +126,13 @@ class HomePageState extends State<HomePage> {
                   height: 50,
                   child: FloatingActionButton(  
                     heroTag: null,
-                    onPressed: () { Navigator.pop(context); },
+                    onPressed: () {
+                      globals.token = "";
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                      );
+                    },
                     child: Text('Logout'),
                   ),
                 ),

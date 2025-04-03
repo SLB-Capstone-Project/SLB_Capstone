@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import "../globals.dart" as globals;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class EditEmployeePage extends StatefulWidget {
   final String id;
@@ -25,6 +28,55 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
   late TextEditingController nameController;
   late TextEditingController departmentController;
   late String selectedType;
+
+  Future<void> _edit() async {
+    if (globals.token == "") {
+      print("No token found");
+      return;
+    }
+    if (nameController.text.isEmpty || departmentController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("All fields are required"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    final String apiUrl = "http://172.191.111.81:8081/api/employee/";
+
+    try {
+      final response = await http.put(
+        Uri.parse(apiUrl),
+        headers: {
+          'Authorization': globals.token, // Include JWT in header
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "employee_id": idController.text,
+          "employee_name": nameController.text,
+          "department": departmentController.text,
+          "user_type": selectedType,
+        }),
+      );
+      print(response.statusCode);
+      final responseBody = json.decode(response.body);
+      if (response.statusCode == 200 && responseBody["code"] == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Edit Success!")),
+        );
+
+        Navigator.pop(context);
+      } else {
+        print(responseBody);
+        throw Exception('Failed to edit employees: ${response.statusCode}');
+      }
+      
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+      );
+    }
+
+  }
 
   @override
   void initState() {
@@ -61,8 +113,6 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
           key: _formKey,
           child: Column(
             children: [
-              buildTextField(controller: idController, label: 'Employee ID'),
-              const SizedBox(height: 16),
               buildTextField(controller: nameController, label: 'Employee Name'),
               const SizedBox(height: 16),
               buildTextField(controller: departmentController, label: 'Department'),
@@ -87,15 +137,7 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
               ),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    print('Updated ID: ${idController.text}');
-                    print('Updated Name: ${nameController.text}');
-                    print('Updated Department: ${departmentController.text}');
-                    print('Updated Type: $selectedType');
-                    Navigator.pop(context);
-                  }
-                },
+                onPressed: _edit,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF7B544C),
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),

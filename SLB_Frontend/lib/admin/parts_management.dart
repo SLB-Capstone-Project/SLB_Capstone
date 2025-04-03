@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'add_employee.dart'; // Make sure this exists
-import 'edit_employee.dart';
-class EmployeePage extends StatefulWidget {
-  const EmployeePage({super.key});
+import 'add_parts.dart'; // Create this screen like AddEmployeePage if needed
+import 'edit_part.dart';
+class PartManagementPage extends StatefulWidget {
+  const PartManagementPage({super.key});
 
   @override
-  State<EmployeePage> createState() => _EmployeePageState();
+  State<PartManagementPage> createState() => _PartManagementPageState();
 }
 
-class _EmployeePageState extends State<EmployeePage> {
+class _PartManagementPageState extends State<PartManagementPage> {
   final TextEditingController searchController = TextEditingController();
 
-  List<Map<String, String>> employees = [
-    {'id': '001', 'name': 'Alice Johnson', 'department': 'HR', 'type': 'Admin'},
-    {'id': '002', 'name': 'Bob Smith', 'department': 'Engineering', 'type': 'Normal'},
-    {'id': '003', 'name': 'Carol Lee', 'department': 'Marketing', 'type': 'Normal'},
+  List<Map<String, String>> parts = [
+    {'id': 'P001', 'name': 'Gearbox', 'category': 'Mechanical', 'type': 'Product'},
+    {'id': 'P002', 'name': 'Sensor', 'category': 'Electronics', 'type': 'Part'},
+    {'id': 'P003', 'name': 'Valve', 'category': 'Hydraulics', 'type': 'Part'},
   ];
 
   String searchQuery = '';
@@ -22,17 +22,17 @@ class _EmployeePageState extends State<EmployeePage> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredEmployees = employees.where((emp) {
+    final filteredParts = parts.where((item) {
       final query = searchQuery.toLowerCase();
-      return emp['name']!.toLowerCase().contains(query) ||
-          emp['department']!.toLowerCase().contains(query) ||
-          emp['id']!.contains(query);
+      return item['name']!.toLowerCase().contains(query) ||
+          item['category']!.toLowerCase().contains(query) ||
+          item['id']!.contains(query);
     }).toList();
 
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Employees', style: TextStyle(color: Colors.white)),
+        title: const Text('Product / Part Management', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
         elevation: 0,
       ),
@@ -67,7 +67,6 @@ class _EmployeePageState extends State<EmployeePage> {
               children: const [
                 Expanded(child: Text('ID', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
                 Expanded(child: Text('Name', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                // Expanded(child: Text('Department', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12))),
                 Expanded(child: Text('Type', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
                 SizedBox(width: 40),
               ],
@@ -77,19 +76,18 @@ class _EmployeePageState extends State<EmployeePage> {
             // 📄 Table Body
             Expanded(
               child: ListView.builder(
-                itemCount: filteredEmployees.length,
+                itemCount: filteredParts.length,
                 itemBuilder: (context, index) {
-                  final emp = filteredEmployees[index];
+                  final part = filteredParts[index];
                   final isExpanded = expandedRows.contains(index);
 
                   return Column(
                     children: [
                       Row(
                         children: [
-                          Expanded(child: Text(emp['id']!, style: const TextStyle(color: Colors.white))),
-                          Expanded(child: Text(emp['name']!, style: const TextStyle(color: Colors.white))),
-                          // Expanded(child: Text(emp['department']!, style: const TextStyle(color: Colors.white))),
-                          Expanded(child: Text(emp['type']!, style: const TextStyle(color: Colors.white))),
+                          Expanded(child: Text(part['id']!, style: const TextStyle(color: Colors.white))),
+                          Expanded(child: Text(part['name']!, style: const TextStyle(color: Colors.white))),
+                          Expanded(child: Text(part['type']!, style: const TextStyle(color: Colors.white))),
                           IconButton(
                             icon: Icon(
                               isExpanded ? Icons.expand_less : Icons.more_vert,
@@ -97,11 +95,7 @@ class _EmployeePageState extends State<EmployeePage> {
                             ),
                             onPressed: () {
                               setState(() {
-                                if (isExpanded) {
-                                  expandedRows.remove(index);
-                                } else {
-                                  expandedRows.add(index);
-                                }
+                                isExpanded ? expandedRows.remove(index) : expandedRows.add(index);
                               });
                             },
                           )
@@ -117,15 +111,16 @@ class _EmployeePageState extends State<EmployeePage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => EditEmployeePage(
-                                        id: emp['id']!,
-                                        name: emp['name']!,
-                                        department: emp['department']!,
-                                        type: emp['type']!,
+                                      builder: (_) => EditPartPage(
+                                        id: part['id']!,
+                                        name: part['name']!,
+                                        category: part['category']!,
+                                        type: part['type']!,
                                       ),
                                     ),
                                   );
                                 },
+
                                 icon: const Icon(Icons.edit, size: 16),
                                 label: const Text('Edit'),
                                 style: ElevatedButton.styleFrom(
@@ -138,7 +133,7 @@ class _EmployeePageState extends State<EmployeePage> {
                               ElevatedButton.icon(
                                 onPressed: () {
                                   setState(() {
-                                    employees.removeAt(index);
+                                    parts.removeAt(index);
                                   });
                                 },
                                 icon: const Icon(Icons.delete, size: 16),
@@ -161,12 +156,12 @@ class _EmployeePageState extends State<EmployeePage> {
 
             const SizedBox(height: 20),
 
-            // ➕ Add New Employee Button
+            // ➕ Add New Part Button
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const AddEmployeePage()),
+                  MaterialPageRoute(builder: (_) => const AddPartPage()),
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -177,7 +172,7 @@ class _EmployeePageState extends State<EmployeePage> {
                 ),
               ),
               child: const Text(
-                'Add New Employee',
+                'Add New Part',
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),

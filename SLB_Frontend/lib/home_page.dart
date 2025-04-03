@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'camera_page.dart';
 import 'inventory.dart';
 import 'tabbed_inventory.dart';
-import 'admin/employee_management.dart';
+import 'admin/admin_main.dart';
 //import 'package:http/http.dart';
 //import 'login_files/login_screen.dart';
 
@@ -84,7 +84,7 @@ class HomePageState extends State<HomePage> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => EmployeePage()),
+                  MaterialPageRoute(builder: (context) => ManagementSelectionPage()),
                 );
               },
             ),

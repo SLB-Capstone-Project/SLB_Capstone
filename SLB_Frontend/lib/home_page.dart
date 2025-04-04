@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'camera_page.dart';
+import './login_files/login_screen.dart';
 //import 'login_files/login_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
-
-  @override 
+  @override
   State<HomePage> createState() => HomePageState();
 }
 
 class HomePageState extends State<HomePage> {
-
   List<String> historyList = <String>[
     'Item 1',
     'Item 2',
@@ -24,7 +23,6 @@ class HomePageState extends State<HomePage> {
     'Item 9',
     'Item 10',
   ];
-
 
   void check_in(String text) {
     int timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -92,13 +90,15 @@ class HomePageState extends State<HomePage> {
                   child: FloatingActionButton(
                     heroTag: null,
                     onPressed: () {
-                      Navigator.pop(context);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                      );
                     },
                     child: Text('Logout'),
                   ),
                 ),
                 SizedBox(
-
                   width: 100,
                   height: 50,
                   child: FloatingActionButton(
@@ -144,16 +144,15 @@ class HistoryWindow extends StatelessWidget {
           clipBehavior: Clip.hardEdge,
           slivers: <Widget>[
             SliverList(
-
-              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                  return HistoryCard(tileString: historyList[index]);
-                }, 
-                childCount: historyList.length,
-              ),
+              delegate: SliverChildBuilderDelegate((
+                BuildContext context,
+                int index,
+              ) {
+                return HistoryCard(tileString: historyList[index]);
+              }, childCount: historyList.length),
             ),
           ],
-        )
-
+        ),
       ),
     );
   }

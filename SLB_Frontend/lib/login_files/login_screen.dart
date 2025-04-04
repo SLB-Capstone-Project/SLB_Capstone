@@ -1,13 +1,21 @@
-
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'register_screen.dart';
+import 'package:http/http.dart' as http;
+import 'package:crypto/crypto.dart'; // Import for hashing
+
+import '../admin/employee_management.dart';
 import '../home_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Save token after successful login
+Future<void> saveToken(String token) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('auth_token', token);
+  print("Token saved: $token");
+}
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
-
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -23,39 +31,60 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _obscurePassword = !_obscurePassword);
   }
 
+  /// New helper to hash password using sha256
+  String _hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    final digest = sha256.convert(bytes);
+    return digest.toString(); // returns hex string
+  }
+
   Future<void> _login() async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("All fields are required"), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text("All fields are required"),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
-    final String apiUrl = "https://ptsv3.com/t/slb_login/";
+    final String apiUrl = "http://172.191.111.81:8081/login";
 
     try {
+      final hashedPassword = _hashPassword(
+        passwordController.text,
+      ); // Use hashed password
+
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "email": emailController.text,
+          "employee_name": emailController.text,
           "password": passwordController.text,
         }),
       );
 
-      if (response.statusCode == 200) {
+      final responseBody = jsonDecode(response.body);
+      if (response.statusCode == 200 && responseBody["code"] == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Login Successful! Redirecting to HomePage.")),
         );
 
-        // Navigate to HomePage after a successful login
-        Navigator.push(
+
+        final access_token = responseBody["data"];
+        await saveToken(access_token);
+
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => HomePage()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Invalid email or password"), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text("Invalid email or password"),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
@@ -63,15 +92,12 @@ class _LoginScreenState extends State<LoginScreen> {
         SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
       );
     }
-
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       backgroundColor: Colors.black,
-
       body: Center(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 30),
@@ -79,9 +105,14 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              Text("Login", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
-
+              Text(
+                "Login",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               SizedBox(height: 5),
               Row(
                 children: [
@@ -93,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => RegisterScreen()),
+                        MaterialPageRoute(builder: (context) => EmployeePage()),
                       );
                     },
                     child: Text(
@@ -108,21 +139,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
               SizedBox(height: 20),
-
-
               TextField(
                 controller: emailController,
                 style: TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-
                   labelText: "Email",
                   labelStyle: TextStyle(color: Colors.white70),
-                  filled: true, fillColor: Colors.grey[900],
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                  filled: true,
+                  fillColor: Colors.grey[900],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               SizedBox(height: 20),
-
               TextField(
                 controller: passwordController,
                 obscureText: _obscurePassword,
@@ -130,29 +161,35 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   labelText: "Password",
                   labelStyle: TextStyle(color: Colors.white70),
-
-                  filled: true, fillColor: Colors.grey[900],
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                  filled: true,
+                  fillColor: Colors.grey[900],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
                   suffixIcon: IconButton(
-                    icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: Colors.white70),
-
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.white70,
+                    ),
                     onPressed: _togglePasswordVisibility,
                   ),
                 ),
               ),
-
               SizedBox(height: 20),
               SizedBox(
-                width: double.infinity, // Make it full width
-                height: 50, // Increase height
+                width: double.infinity,
+                height: 50,
                 child: ElevatedButton(
                   onPressed: _login,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.brown, // Brown color (same as Register)
+                    backgroundColor: Colors.brown,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12), // Match Register button
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    elevation: 0, // No shadow
+                    elevation: 0,
                   ),
                   child: Text(
                     "Log In",
@@ -164,7 +201,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-
             ],
           ),
         ),
@@ -172,4 +208,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-

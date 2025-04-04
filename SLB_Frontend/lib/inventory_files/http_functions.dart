@@ -32,8 +32,9 @@ Future<List<String>> getUserParts() async {
   return string_arr;
 }
 
-Future<List<String>> getUserProducts() async {
-  List<String> string_arr = [];
+Future<List> getUserProducts() async {
+  //List<String> string_arr = [];
+  List items = [];
   print("getting user products");
   //final uri = Uri.http('172.191.111.81:8081', '/api/categories', {'name': 'Bob Lin'});
   //print(uri);
@@ -50,16 +51,17 @@ Future<List<String>> getUserProducts() async {
   if(response.statusCode == 200) {
     //print(response.body);
     final responseBody = jsonDecode(response.body);
-    List items = responseBody['data'];
-    print(items);
+    items = responseBody['data'];
+    //print(items);
     //List temp =  jsonDecode(response.body);
     //print(items);
-    for(int i = 0; i < items.length; i++) {
+    /*for(int i = 0; i < items.length; i++) {
       string_arr.add("Product ID: ${items[i]['productId']} \n"
+        "ProductName: ${items[i]['productName']} \n"
        "Part ID: ${items[i]['partId']} \n"
        "partName: ${items[i]['partName']}");
       //print(temp[i]);
-    }
+    }*/
   }
   /*if(response.statusCode == 200) {
     //print(response.body);
@@ -76,7 +78,8 @@ Future<List<String>> getUserProducts() async {
     print(response.body);
     //throw Exception('Unable to connect');
   }
-  return string_arr;
+  //return string_arr;
+  return items;
 }
 
 Future<void> borrowProduct() async {

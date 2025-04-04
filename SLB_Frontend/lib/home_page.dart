@@ -3,6 +3,7 @@ import 'camera_page.dart';
 import 'inventory_files/inventory.dart';
 import 'inventory_files/tabbed_inventory.dart';
 import 'inventory_files/user_inventory.dart' as user;
+import 'checkin_files/checkin_page.dart';
 //import 'package:http/http.dart';
 //import 'login_files/login_screen.dart';
 

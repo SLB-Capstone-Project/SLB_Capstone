@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 //import 'package:camera/camera.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
 
@@ -147,5 +147,5 @@ class _CheckInPageState extends State<CheckInPage> {
     );
   }
 
-}
+}*/
 

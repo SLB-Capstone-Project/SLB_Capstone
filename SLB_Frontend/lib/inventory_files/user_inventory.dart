@@ -26,8 +26,16 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
   void initState() {
     super.initState();
     _tabController = TabController(vsync: this, length: myTabs.length);
-    http_funct.getUserProducts().then((List<String> result) {
-      product_arr = result;
+    http_funct.getUserProducts().then((List result) {
+      //result contains a list of parts 
+      print(result[0]);
+      for(int i = 0; i < result.length; i++) {
+        product_arr.add("Product ID: ${result[i]['productId']} \n"
+          "ProductName: ${result[i]['productName']}");
+       part_arr.add( "Part ID: ${result[i]['partId']} \n"
+        "partName: ${result[i]['partName']}");
+      }
+      product_arr = product_arr.toSet().toList();
       setState(() {});
     });
 
@@ -75,12 +83,18 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
               TextField(  
 
               ),
-              FloatingActionButton( 
+              /*FloatingActionButton( 
                 child: Text("Borrow product"),
                 onPressed: () {
                   http_funct.borrowProduct();
                 }
               ),
+              FloatingActionButton( 
+                child: Text("Return product"),
+                onPressed: () {
+                  //http_funct.returnProduct();
+                }
+              ),*/
               Expanded(
                 child: SizedBox(
                   height: 200,
@@ -99,24 +113,40 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
               ),
             ]
           ),
-          Expanded (  
-            //height: 200,
-            //child: Column( 
-            child: SizedBox(  
-              height: 200,
-              child: ListView.separated(  
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(8),
-                itemCount: part_arr.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    leading: Text(part_arr[index]),
-                    //onTap: () => {remove_part_index(index)},
-                    );
-                },
-                separatorBuilder: (BuildContext context, int index) => const Divider(),
+          Column (
+            children: [
+              TextField(  
+
               ),
-            )
+              /*FloatingActionButton( 
+                child: Text("Borrow product"),
+                onPressed: () {
+                  http_funct.borrowProduct();
+                }
+              ),
+              FloatingActionButton( 
+                child: Text("Return product"),
+                onPressed: () {
+                  //http_funct.returnProduct();
+                }
+              ),*/
+              Expanded(
+                child: SizedBox(
+                  height: 200,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(8),
+                    itemCount: part_arr.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return ListTile(
+                        leading: Text(part_arr[index]),
+                        //onTap: () => {remove_index(index)},
+                        );
+                    },
+                    separatorBuilder: (BuildContext context, int index) => const Divider(),
+                  ),
+                ),
+              ),
+            ]
           ),
         ],
       ),

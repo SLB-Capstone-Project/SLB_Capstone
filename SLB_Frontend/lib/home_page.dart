@@ -6,10 +6,9 @@ import 'camera_page.dart';
 import 'checkin_files/checkin_page.dart';
 import 'inventory_files/user_inventory.dart';
 import 'admin/admin_main.dart';
-import "globals.dart" as globals;
-//import 'package:http/http.dart';
-//import 'login_files/login_screen.dart';
-
+//import 'package:http/http.dart' as http;
+import 'globals.dart' as global;
+import 'inventory_files/http_functions.dart' as http_funct;
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -18,7 +17,25 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  List<String> historyList = <String>['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5', 'Item 6', 'Item 7', 'Item 8', 'Item 9', 'Item 10'];
+  /*List<String> historyList = <String>['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5', 'Item 6', 'Item 7', 'Item 8', 'Item 9', 'Item 10'];*/
+  List<String> historyList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    http_funct.getUserHistory().then((List result) {
+      //result contains a list of parts 
+      //print(result[0]);
+      for(int i = 0; i < result.length; i++) {
+        historyList.add("Product ID: ${result[i]['productId']} \n"
+          "Part ID ${result[i]['partId']} \n "
+          "Action: ${result[i]['action']} \n"
+          "Time : ${result[i]['operateTime']}");
+      }
+      //product_arr = product_arr.toSet().toList();
+      setState(() {});
+    });
+  }
 
   void check_in(String text) {
     int timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -129,7 +146,7 @@ class HomePageState extends State<HomePage> {
                   child: FloatingActionButton(  
                     heroTag: null,
                     onPressed: () {
-                      globals.token = "";
+                      global.token = "";
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => LoginScreen()),
@@ -207,7 +224,7 @@ class HistoryCard extends StatelessWidget {
     //return ClipRRect (  
     //  borderRadius: BorderRadius.circular(20.0),
     return Container( 
-      height: 60,
+      height: 120,
       //padding: EdgeInsets.all(8.0),
       //width: 300,
       child: Card.outlined(  

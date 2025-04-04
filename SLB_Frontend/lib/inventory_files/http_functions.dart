@@ -162,3 +162,28 @@ Future<void> deleteProduct(int id) async {
   }*/
   //return string_arr;
 }
+
+
+Future<List> getUserHistory() async {
+  List items = [];
+  print("getting user history");
+  final String sendUrl = 'http://172.191.111.81:8081/api/activities';
+  final response = await http.get(  
+    Uri.parse(sendUrl),
+    headers: {
+      'Authorization': global.token,
+      'Content-Type': 'application/json',
+    }
+  );
+  if(response.statusCode == 200) {
+    print(response.body);
+    final responseBody = jsonDecode(response.body);
+    items = responseBody['data'];
+  }
+  else {
+    print(response.statusCode);
+    print(response.body);
+    //throw Exception('Unable to connect');
+  }
+  return items;
+}

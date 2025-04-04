@@ -3,6 +3,7 @@ import 'package:barcode_scan2/barcode_scan2.dart' as barcode_scan;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'dart:async'; // 用于 Duration
 
 String globalToken = '';
 const String apiUsername = "Bob Lin";
@@ -138,12 +139,16 @@ class _CheckInPageState extends State<CheckInPage> {
     });
   }
 
+
   Future<void> borrowItem() async {
-    print('DEBUG: Attempting borrow with PartID: $currentPartId, Token: $globalToken');
+    print('Attempting borrow with PartID: $currentPartId');
+
+    // Validate input
     if (currentPartId == null) {
       setState(() {
         scanResultMessage = 'Please scan a barcode first';
         scanResultColor = Colors.red;
+        isLoading = false;
       });
       return;
     }
@@ -154,37 +159,47 @@ class _CheckInPageState extends State<CheckInPage> {
       scanResultColor = Colors.blue;
     });
 
-    final url = Uri.parse('http://172.191.111.81:8081/api/activities/borrow');
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': globalToken,
-        // 'Authorization': globalToken,
-      },
-      body: jsonEncode({
-        'part_id': 105,
-        // 'employee_id': 2,
-      }),
-    );
+    try {
+      final url = Uri.parse('http://172.191.111.81:8081/api/activities/borrow');
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': globalToken,
+        },
+        body: jsonEncode({'part_id': currentPartId}),
+      ).timeout(const Duration(seconds: 10));
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        setState(() {
+          scanResultMessage = 'Borrow successful';
+          scanResultColor = Colors.green;
+        });
+      } else {
+        setState(() {
+          scanResultMessage = 'Server error: ${response.statusCode}';
+          scanResultColor = Colors.orange;
+        });
+      }
+    } catch (e) {
       setState(() {
-        scanResultMessage = 'Borrow operation successful';
-        scanResultColor = Colors.green;
+        scanResultMessage = 'Error: ${e.toString().replaceAll('\n', ' ')}';
+        scanResultColor = Colors.red;
       });
-    } else {
-      throw Exception('HTTP ${response.statusCode}: ${response.body}');
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 
   Future<void> returnItem() async {
-    print('DEBUG: Attempting borrow with PartID: $currentPartId, Token: $globalToken');
+    print('Attempting return with PartID: $currentPartId');
+
+    // Validate input
     if (currentPartId == null) {
       setState(() {
         scanResultMessage = 'Please scan a barcode first';
         scanResultColor = Colors.red;
+        isLoading = false;
       });
       return;
     }
@@ -195,28 +210,35 @@ class _CheckInPageState extends State<CheckInPage> {
       scanResultColor = Colors.blue;
     });
 
-    final url = Uri.parse('http://172.191.111.81:8081/api/activities/return');
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        // 'Authorization': 'Bearer ${globalToken.trim()}',
-        'Authorization': globalToken,
-      },
-      body: jsonEncode({
-        'part_id': 130,
-        // 'employee_id': 2,
-      }),
-    );
+    try {
+      final url = Uri.parse('http://172.191.111.81:8081/api/activities/return');
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': globalToken,
+        },
+        body: jsonEncode({'part_id': currentPartId}),
+      ).timeout(const Duration(seconds: 10));
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        setState(() {
+          scanResultMessage = 'Return successful';
+          scanResultColor = Colors.green;
+        });
+      } else {
+        setState(() {
+          scanResultMessage = 'Server error: ${response.statusCode}';
+          scanResultColor = Colors.orange;
+        });
+      }
+    } catch (e) {
       setState(() {
-        scanResultMessage = 'Return operation successful';
-        scanResultColor = Colors.green;
+        scanResultMessage = 'Error: ${e.toString().replaceAll('\n', ' ')}';
+        scanResultColor = Colors.red;
       });
-    } else {
-      throw Exception('HTTP ${response.statusCode}: ${response.body}');
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 

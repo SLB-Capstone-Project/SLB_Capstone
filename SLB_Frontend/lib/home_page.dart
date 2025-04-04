@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:namer_app/login_files/login_screen.dart';
 import 'camera_page.dart';
-import 'inventory_files/inventory.dart';
-import 'inventory_files/tabbed_inventory.dart';
-import 'inventory_files/user_inventory.dart' as user;
-import 'checkin_files/checkin_page.dart';
+import 'inventory.dart';
+import 'tabbed_inventory.dart';
+import 'admin/admin_main.dart';
+import "globals.dart" as globals;
 //import 'package:http/http.dart';
 //import 'login_files/login_screen.dart';
 
@@ -42,18 +43,57 @@ class HomePageState extends State<HomePage> {
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
-        leading: IconButton(  
-          icon: const Icon(Icons.menu),
-          color: Colors.white,
-          onPressed: () async {
-            //getData();
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const user.UserInventory()));
-          }
+      ),
+      drawer: Drawer(
+        backgroundColor: Colors.black,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            Container(
+              height: 120, // Smaller height
+              color: Colors.brown,
+              child: Padding(
+                padding: EdgeInsets.only(top: 80, left: 16), // Top + left padding
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Menu',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            ListTile(
+              leading: Icon(Icons.inventory, color: Colors.white),
+              title: Text('Inventory', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer first
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Inventory()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.admin_panel_settings, color: Colors.white),
+              title: Text('Admin', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ManagementSelectionPage()),
+                );
+              },
+            ),
+          ],
         ),
       ),
-      drawer: Drawer(  
-        child: Text('Temp'),
-      ),
+
       body: Center(  
         child: Column(  
           
@@ -86,7 +126,13 @@ class HomePageState extends State<HomePage> {
                   height: 50,
                   child: FloatingActionButton(  
                     heroTag: null,
-                    onPressed: () { Navigator.pop(context); },
+                    onPressed: () {
+                      globals.token = "";
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                      );
+                    },
                     child: Text('Logout'),
                   ),
                 ),

@@ -5,15 +5,7 @@ import 'package:crypto/crypto.dart'; // Import for hashing
 
 import '../admin/employee_management.dart';
 import '../home_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../globals.dart' as global;
-
-// Save token after successful login
-Future<void> saveToken(String token) async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setString('auth_token', token);
-  print("Token saved: $token");
-}
+import "../globals.dart" as globals;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -62,22 +54,20 @@ class _LoginScreenState extends State<LoginScreen> {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "employee_name": emailController.text,
-          "password": passwordController.text,
+          "password": hashedPassword,
         }),
       );
 
       final responseBody = jsonDecode(response.body);
       if (response.statusCode == 200 && responseBody["code"] == 200) {
-        //print(responseBody);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Login Successful! Redirecting to HomePage.")),
         );
 
         final access_token = responseBody["data"];
-        global.token = access_token;
-        await saveToken(access_token);
+        globals.token = access_token;
 
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => HomePage()),
         );
@@ -114,31 +104,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                 ),
-              ),
-              SizedBox(height: 5),
-              Row(
-                children: [
-                  Text(
-                    "Don't have an account?",
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => EmployeePage()),
-                      );
-                    },
-                    child: Text(
-                      "Register",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
               ),
               SizedBox(height: 20),
               TextField(

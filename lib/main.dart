@@ -5,15 +5,16 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 String globalToken = '';
-const String apiUsername = 'Bob Lin';
-const String apiPassword = 'bob456';
+const String apiUsername = "Admin";
+const String apiPassword = "123456";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
     globalToken = await fetchAuthToken();
-    print('Token successfully obtained: ${globalToken.substring(0, 10)}...');
+    print('Token successfully obtained. Length: ${globalToken.length}');
+    print('Token successfully obtained: ${globalToken}...');
     runApp(const MyApp());
   } catch (e) {
     print('Failed to get token: $e');
@@ -47,9 +48,11 @@ Future<String> fetchAuthToken() async {
     }),
   );
 
+  print('Raw token response: ${response.body}');
+
   if (response.statusCode == 200) {
     final data = jsonDecode(response.body);
-    return data['token'] ?? data['access_token'] ?? '';
+    return data['data'] ?? '';
   } else {
     throw Exception('Failed to get token: ${response.statusCode}');
   }
@@ -119,6 +122,12 @@ class _CheckInPageState extends State<CheckInPage> {
     String categoryId = barcode.substring(0, 4);
     String componentId = barcode.substring(4);
 
+    // Convert to integer to remove leading zeros
+    int partId = int.parse(componentId);
+
+    print('DEBUG: Scanned barcode - Category: $categoryId, PartID: $partId');
+    print('DEBUG: Current token: $globalToken');
+
     setState(() {
       isLoading = true;
       scanResultMessage = 'Barcode scanned: $categoryId $componentId';
@@ -130,6 +139,7 @@ class _CheckInPageState extends State<CheckInPage> {
   }
 
   Future<void> borrowItem() async {
+    print('DEBUG: Attempting borrow with PartID: $currentPartId, Token: $globalToken');
     if (currentPartId == null) {
       setState(() {
         scanResultMessage = 'Please scan a barcode first';
@@ -150,7 +160,8 @@ class _CheckInPageState extends State<CheckInPage> {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $globalToken',
+          'Authorization': 'Bearer ${globalToken.trim()}',
+          // 'Authorization': globalToken,
         },
         body: jsonEncode({
           'part_id': currentPartId,
@@ -178,6 +189,7 @@ class _CheckInPageState extends State<CheckInPage> {
   }
 
   Future<void> returnItem() async {
+    print('DEBUG: Attempting borrow with PartID: $currentPartId, Token: $globalToken');
     if (currentPartId == null) {
       setState(() {
         scanResultMessage = 'Please scan a barcode first';
@@ -198,7 +210,8 @@ class _CheckInPageState extends State<CheckInPage> {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $globalToken',
+          'Authorization': 'Bearer ${globalToken.trim()}',
+          // 'Authorization': globalToken,
         },
         body: jsonEncode({
           'part_id': currentPartId,

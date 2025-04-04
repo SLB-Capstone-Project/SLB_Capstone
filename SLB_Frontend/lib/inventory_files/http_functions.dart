@@ -10,7 +10,6 @@ Future<List<String>> getUserParts() async {
   List<String> string_arr = [];
   final String sendUrl = 'http://172.191.111.81:8081/api/components';
   String token = global.token;
-  print(token);
   final response = await http.get(  
     Uri.parse(sendUrl),
     headers: {
@@ -39,7 +38,6 @@ Future<List> getUserProducts() async {
   //final uri = Uri.http('172.191.111.81:8081', '/api/categories', {'name': 'Bob Lin'});
   //print(uri);
   final String sendUrl = 'http://172.191.111.81:8081/api/components/borrowed';
-  print(global.token);
   final response = await http.get(  
     Uri.parse(sendUrl),
     //uri,
@@ -85,7 +83,6 @@ Future<List> getUserProducts() async {
 Future<void> borrowProduct() async {
   print("borrowing product");
   final String uri = 'http://172.191.111.81:8081/api/activities/borrow';
-  print(global.token);
   final response = await http.post(  
     Uri.parse(uri),
     headers: {
@@ -176,9 +173,15 @@ Future<List> getUserHistory() async {
     }
   );
   if(response.statusCode == 200) {
-    print(response.body);
+    //print(response.body);
     final responseBody = jsonDecode(response.body);
     items = responseBody['data'];
+    for(int i = 0; i <   items.length; i++) {
+      global.historyList.insert(0, "Product ID: ${items[i]['productId']} \n"
+        "Part ID ${items[i]['partId']} \n"
+        "Action: ${items[i]['action']} \n"
+        "Time : ${items[i]['operateTime']}");
+    }
   }
   else {
     print(response.statusCode);

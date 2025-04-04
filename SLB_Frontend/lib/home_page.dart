@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:namer_app/login_files/login_screen.dart';
-import 'camera_page.dart';
 //import 'inventory.dart';
 //import 'tabbed_inventory.dart';
 import 'checkin_files/checkin_page.dart';
@@ -18,7 +17,7 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   /*List<String> historyList = <String>['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5', 'Item 6', 'Item 7', 'Item 8', 'Item 9', 'Item 10'];*/
-  List<String> historyList = [];
+  //List<String> historyList = [];
 
   @override
   void initState() {
@@ -26,28 +25,17 @@ class HomePageState extends State<HomePage> {
     http_funct.getUserHistory().then((List result) {
       //result contains a list of parts 
       //print(result[0]);
-      for(int i = 0; i < result.length; i++) {
-        historyList.add("Product ID: ${result[i]['productId']} \n"
-          "Part ID ${result[i]['partId']} \n "
+      /*for(int i = 0; i <   result.length; i++) {
+        global.historyList.insert(0, "Product ID: ${result[i]['productId']} \n"
+          "Part ID ${result[i]['partId']} \n"
           "Action: ${result[i]['action']} \n"
           "Time : ${result[i]['operateTime']}");
-      }
+      }*/
       //product_arr = product_arr.toSet().toList();
       setState(() {});
     });
   }
 
-  void check_in(String text) {
-    int timestamp = DateTime.now().millisecondsSinceEpoch;
-    DateTime time = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    //final dateFormatter = DateFormat('yyyy-MM-dd');
-    //final formattedDate = dateFormatter.format(time);
-    //print(formattedDate);
-    setState(() {
-      //historyList.add('Checked in: $text \n Date: $formattedDate');
-      historyList.add('Checked in: $text \n Date:');
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +123,7 @@ class HomePageState extends State<HomePage> {
               ),
             ),
             SizedBox(height:15),
-            HistoryWindow(historyList: historyList),
+            HistoryWindow(historyList: global.historyList),
             SizedBox(height:50),
             Row( 
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -2,79 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:barcode_scan2/barcode_scan2.dart' as barcode_scan;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter/services.dart';
-import 'dart:async'; // 用于 Duration
 import '../globals.dart' as global;
+import 'package:flutter/services.dart';
+import '../inventory_files/http_functions.dart' as http_funct;
+import 'dart:async'; // 用于 Duration
 
-//String globalToken = '';
-//const String apiUsername = "Bob Lin";
-//const String apiPassword = "bob456";
-/*
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  try {
-    globalToken = await fetchAuthToken();
-    print('Token successfully obtained. Length: ${globalToken.length}');
-    print('Token successfully obtained: ${globalToken}...');
-    runApp(const MyApp());
-  } catch (e) {
-    print('Failed to get token: $e');
-    runApp(const TokenErrorApp());
-  }
-}
-
-class TokenErrorApp extends StatelessWidget {
-  const TokenErrorApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Unaccessible, network connection error\n: $globalToken'),
-        ),
-      ),
-    );
-  }
-}
-
-Future<String> fetchAuthToken() async {
-  final url = Uri.parse('http://172.191.111.81:8081/login');
-  final response = await http.post(
-    url,
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'employee_name': apiUsername,
-      'password': apiPassword,
-    }),
-  );
-
-  print('Raw token response: ${response.body}');
-
-  if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['data'] ?? '';
-  } else {
-    throw Exception('Failed to get token: ${response.statusCode}');
-  }
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Scanner Page',
-      theme: ThemeData(
-        primarySwatch: Colors.brown,
-      ),
-      home: const CheckInPage(),
-    );
-  }
-}
-*/
 class CheckInPage extends StatefulWidget {
   const CheckInPage({super.key});
 
@@ -127,8 +59,8 @@ class _CheckInPageState extends State<CheckInPage> {
     // Convert to integer to remove leading zeros
     int partId = int.parse(componentId);
 
-    print('DEBUG: Scanned barcode - Category: $categoryId, PartID: $partId');
-    print('DEBUG: Current token: ${global.token}');
+    //('DEBUG: Scanned barcode - Category: $categoryId, PartID: $partId');
+    //print('DEBUG: Current token: $globalToken');
 
     setState(() {
       isLoading = true;
@@ -172,6 +104,7 @@ class _CheckInPageState extends State<CheckInPage> {
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
+        http_funct.getUserHistory();
         setState(() {
           scanResultMessage = 'Borrow successful';
           scanResultColor = Colors.green;
@@ -223,6 +156,7 @@ class _CheckInPageState extends State<CheckInPage> {
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
+        http_funct.getUserHistory();
         setState(() {
           scanResultMessage = 'Return successful';
           scanResultColor = Colors.green;
@@ -324,31 +258,18 @@ class _CheckInPageState extends State<CheckInPage> {
                         foregroundColor: Colors.white,
                         minimumSize: const Size(120, 48),
                       ),
-                      onPressed: isLoading
-                          ? null
-                          : () {
-                        setState(() {
-                          scanResultMessage = '';
-                          scanResultColor = Colors.transparent;
-                        });
-                      },
-                      child: const Text('Clear'),
-                    ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.brown,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(120, 48),
-                      ),
-                      onPressed: isLoading
-                          ? null
-                          : () {
+                      onPressed: isLoading ? null : () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => ManualInputPage(
-                              onBarcodeSubmitted: (barcode) {
-                                processBarcode(barcode);
+                              onPartIdSubmitted: (partId) {
+                                setState(() {
+                                  currentPartId = partId;
+                                  scanResultMessage = 'Part ID set: $partId';
+                                  scanResultColor = Colors.green;
+                                  _historyRecords.add('${_historyRecords.length + 1}. Part ID: $partId');
+                                });
                               },
                             ),
                           ),
@@ -396,8 +317,8 @@ class _CheckInPageState extends State<CheckInPage> {
 }
 
 class ManualInputPage extends StatefulWidget {
-  final Function(String)? onBarcodeSubmitted;
-  const ManualInputPage({Key? key, this.onBarcodeSubmitted}) : super(key: key);
+  final Function(int)? onPartIdSubmitted;
+  const ManualInputPage({Key? key, this.onPartIdSubmitted}) : super(key: key);
   @override _ManualInputPageState createState() => _ManualInputPageState();
 }
 
@@ -408,10 +329,11 @@ class _ManualInputPageState extends State<ManualInputPage> {
   bool isLoading = false;
 
   void processManualInput() {
-    final barcode = _barcodeController.text;
-    if (barcode.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(barcode)) {
+    final input = _barcodeController.text;
+
+    if (!RegExp(r'^[0-9]+$').hasMatch(input) || input.length > 6) {
       setState(() {
-        scanResultMessage = 'Invalid barcode: must be 10 digits';
+        scanResultMessage = 'Invalid input: must be up to 6 digits';
         scanResultColor = Colors.red;
       });
       return;
@@ -423,12 +345,15 @@ class _ManualInputPageState extends State<ManualInputPage> {
       scanResultColor = Colors.blue;
     });
 
-    if (widget.onBarcodeSubmitted != null) {
-      widget.onBarcodeSubmitted!(barcode);
+    // 去零处理并转换为整数
+    int partId = int.parse(input);
+
+    if (widget.onPartIdSubmitted != null) {
+      widget.onPartIdSubmitted!(partId);
     }
 
     setState(() {
-      scanResultMessage = 'Barcode accepted';
+      scanResultMessage = 'Part ID accepted: $partId';
       scanResultColor = Colors.green;
       isLoading = false;
     });
@@ -441,7 +366,7 @@ class _ManualInputPageState extends State<ManualInputPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Manual Input'),
+        title: const Text('Manual Input Part ID'),
         backgroundColor: Colors.brown,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -464,8 +389,11 @@ class _ManualInputPageState extends State<ManualInputPage> {
               children: [
                 TextField(
                   controller: _barcodeController,
+                  keyboardType: TextInputType.number,
+                  maxLength: 6,
+                  style: const TextStyle(color: Colors.white),
                   decoration: const InputDecoration(
-                    labelText: 'Enter Barcode',
+                    labelText: 'Enter Part ID (up to 6 digits)',
                     labelStyle: TextStyle(color: Colors.white),
                     border: OutlineInputBorder(),
                     enabledBorder: OutlineInputBorder(
@@ -475,9 +403,6 @@ class _ManualInputPageState extends State<ManualInputPage> {
                       borderSide: BorderSide(color: Colors.brown, width: 2),
                     ),
                   ),
-                  keyboardType: TextInputType.number,
-                  maxLength: 10,
-                  style: const TextStyle(color: Colors.white),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
@@ -515,6 +440,7 @@ class _ManualInputPageState extends State<ManualInputPage> {
     );
   }
 }
+
 
 class HistoryPage extends StatefulWidget {
   final List<String> historyRecords;

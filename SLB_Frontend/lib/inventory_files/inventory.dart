@@ -3,7 +3,7 @@ import 'tabbed_inventory.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'globals.dart' as global;
+import '../globals.dart' as global;
 
 Future<List<String>> getData() async {
     List<String> string_arr = [];

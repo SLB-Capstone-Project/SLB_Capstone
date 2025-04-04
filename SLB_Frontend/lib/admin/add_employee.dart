@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
 import 'package:crypto/crypto.dart'; // Import for hashing
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../globals.dart' as globals;
+
 
 class AddEmployeePage extends StatefulWidget {
   const AddEmployeePage({super.key});
@@ -17,6 +19,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
   final TextEditingController idController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController departmentController = TextEditingController();
+
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
 
@@ -130,6 +133,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                     value == null || value.isEmpty ? 'Please enter a department' : null,
               ),
               const SizedBox(height: 16),
+
               buildTextField(
                 controller: passwordController,
                 label: 'Password',
@@ -175,6 +179,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                 ),
               ),
               const SizedBox(height: 16),
+
               DropdownButtonFormField<String>(
                 value: selectedType,
                 dropdownColor: Colors.grey[900],
@@ -188,7 +193,9 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                   ),
                 ),
                 style: const TextStyle(color: Colors.white),
+
                 items: ['Admin', 'Regular User']
+
                     .map((type) => DropdownMenuItem(
                           value: type,
                           child: Text(type),
@@ -204,7 +211,9 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
+
                     _register();
+
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -230,14 +239,18 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
     required TextEditingController controller,
     required String label,
     String? Function(String?)? validator,
+
     bool obscureText = false,
     Widget? suffixIcon,
+
   }) {
     return TextFormField(
       controller: controller,
       style: const TextStyle(color: Colors.white),
       validator: validator,
+
       obscureText: obscureText,
+
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white),
@@ -246,8 +259,10 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
+
         suffixIcon: suffixIcon,
       ),
     );
   }
 }
+

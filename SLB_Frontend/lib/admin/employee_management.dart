@@ -6,6 +6,7 @@ import '../globals.dart' as globals;
 import 'edit_employee.dart';
 
 
+
 class EmployeePage extends StatefulWidget {
   const EmployeePage({super.key});
 
@@ -111,6 +112,7 @@ class _EmployeePageState extends State<EmployeePage> {
         'Authorization': globals.token,
       },
     );
+
 
       if (response.statusCode == 200) {
         // Refresh the employee list after successful deletion

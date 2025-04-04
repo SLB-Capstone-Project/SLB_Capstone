@@ -1,28 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:namer_app/login_files/login_screen.dart';
 import 'camera_page.dart';
-import './login_files/login_screen.dart';
+import 'inventory.dart';
+import 'tabbed_inventory.dart';
+import 'admin/admin_main.dart';
+import "globals.dart" as globals;
+//import 'package:http/http.dart';
 //import 'login_files/login_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
-  @override
+  @override 
   State<HomePage> createState() => HomePageState();
 }
 
 class HomePageState extends State<HomePage> {
-  List<String> historyList = <String>[
-    'Item 1',
-    'Item 2',
-    'Item 3',
-    'Item 4',
-    'Item 5',
-    'Item 6',
-    'Item 7',
-    'Item 8',
-    'Item 9',
-    'Item 10',
-  ];
+  List<String> historyList = <String>['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5', 'Item 6', 'Item 7', 'Item 8', 'Item 9', 'Item 10'];
 
   void check_in(String text) {
     int timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -38,7 +32,7 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold( 
       backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text('Home Page'),
@@ -49,48 +43,92 @@ class HomePageState extends State<HomePage> {
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          color: Colors.white,
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const Inventory()),
-            );
-          },
+      ),
+      drawer: Drawer(
+        backgroundColor: Colors.black,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            Container(
+              height: 120, // Smaller height
+              color: Colors.brown,
+              child: Padding(
+                padding: EdgeInsets.only(top: 80, left: 16), // Top + left padding
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Menu',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            ListTile(
+              leading: Icon(Icons.inventory, color: Colors.white),
+              title: Text('Inventory', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer first
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Inventory()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.admin_panel_settings, color: Colors.white),
+              title: Text('Admin', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ManagementSelectionPage()),
+                );
+              },
+            ),
+          ],
         ),
       ),
-      drawer: Drawer(child: Text('Temp')),
-      body: Center(
-        child: Column(
+
+      body: Center(  
+        child: Column(  
+          
           //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
+          children: [  
             //Column(
-            // children: [
-            SizedBox(height: 30),
-            Container(
+             // children: [
+            SizedBox(height:30),
+            Container( 
               margin: EdgeInsets.symmetric(horizontal: 25),
               alignment: Alignment.centerLeft,
               color: Colors.black,
               //padding: EdgeInsets.all(20),
               child: Text(
                 'Recent Activity',
-                style: TextStyle(color: Colors.white, fontSize: 20),
+                style: TextStyle(  
+                  color: Colors.white,
+                  fontSize: 20,
+                ),
               ),
             ),
-            SizedBox(height: 15),
+            SizedBox(height:15),
             HistoryWindow(historyList: historyList),
-            SizedBox(height: 50),
-            Row(
+            SizedBox(height:50),
+            Row( 
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                SizedBox(
+              children: [ 
+                SizedBox( 
                   width: 100,
                   height: 50,
-                  child: FloatingActionButton(
+                  child: FloatingActionButton(  
                     heroTag: null,
                     onPressed: () {
-                      Navigator.pushReplacement(
+                      globals.token = "";
+                      Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => LoginScreen()),
                       );
@@ -98,7 +136,7 @@ class HomePageState extends State<HomePage> {
                     child: Text('Logout'),
                   ),
                 ),
-                SizedBox(
+                SizedBox ( 
                   width: 100,
                   height: 50,
                   child: FloatingActionButton(
@@ -130,9 +168,9 @@ class HistoryWindow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
-      child: SizedBox(
-        height: 500,
-        width: 350,
+      child: Container( 
+        height:500,
+        width:350,
         /*decoration: BoxDecoration(  
           color: Colors.brown,
           borderRadius: BorderRadius.circular(40),
@@ -144,15 +182,14 @@ class HistoryWindow extends StatelessWidget {
           clipBehavior: Clip.hardEdge,
           slivers: <Widget>[
             SliverList(
-              delegate: SliverChildBuilderDelegate((
-                BuildContext context,
-                int index,
-              ) {
-                return HistoryCard(tileString: historyList[index]);
-              }, childCount: historyList.length),
+              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                  return HistoryCard(tileString: historyList[index]);
+                }, 
+                childCount: historyList.length,
+              ),
             ),
           ],
-        ),
+        )
       ),
     );
   }
@@ -165,27 +202,32 @@ class HistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //return ClipRRect (
+    //return ClipRRect (  
     //  borderRadius: BorderRadius.circular(20.0),
-    return SizedBox(
+    return Container( 
       height: 60,
       //padding: EdgeInsets.all(8.0),
       //width: 300,
-      child: Card.outlined(
+      child: Card.outlined(  
         //margin: EdgeInsets.zero,
         color: Colors.black,
-        child: Container(
+        child: Container(  
           padding: EdgeInsets.all(8.0),
-          child: Row(
-            children: [
+          child: Row( 
+            children: [  
               //Text('Check in'),
-              Text(tileString, style: TextStyle(color: Colors.white)),
-
+              Text(
+                tileString, 
+                style: TextStyle(  
+                  color: Colors.white,
+                  
+                ),
+              ),
               //Text('Date: $date')
             ],
           ),
         ),
-      ),
+      )
     );
     //);
   }
@@ -199,10 +241,10 @@ class Inventory extends StatefulWidget {
 }
 
 class InventoryState extends State<Inventory> {
-  @override
+  @override 
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return Scaffold(  
+      appBar: AppBar(  
         title: Text('Inventory'),
         backgroundColor: Colors.brown,
         toolbarHeight: 60.0,
@@ -211,15 +253,15 @@ class InventoryState extends State<Inventory> {
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
-        leading: IconButton(
+        leading: IconButton(  
           icon: const Icon(Icons.home),
           color: Colors.white,
           onPressed: () {
             Navigator.pop(context);
-          },
+          }
         ),
       ),
-      body: Container(color: Colors.black),
+      body: TabbedInventory(),
     );
   }
 }

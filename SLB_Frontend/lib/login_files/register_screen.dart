@@ -50,7 +50,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    final String apiUrl = "https://ptsv3.com/t/slb_login/";
+    final String apiUrl = "http://172.191.111.81:8081/login";
 
     // Hash the password before sending it to the server
     String hashedPassword = hashPassword(passwordController.text);

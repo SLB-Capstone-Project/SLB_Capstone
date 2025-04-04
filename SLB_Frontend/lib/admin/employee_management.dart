@@ -2,13 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'add_employee.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../globals.dart' as globals;
+import 'edit_employee.dart';
 
-// Retrieve token later
-Future<String?> getToken() async {
-  final prefs = await SharedPreferences.getInstance();
-  return prefs.getString('auth_token');
-}
 
 class EmployeePage extends StatefulWidget {
   const EmployeePage({super.key});
@@ -32,59 +28,89 @@ class _EmployeePageState extends State<EmployeePage> {
   }
 
   Future<void> _fetchEmployees() async {
-    final access_token = await getToken(); // Retrieve saved token
-    if (access_token == null) {
-      print("No token found");
-      return;
-    }
-    print(access_token);
-    setState(() {
-      isLoading = true;
-      errorMessage = '';
-    });
 
-    try {
-      // Replace with your actual API endpoint
-      const apiUrl = 'http://172.191.111.81:8081/api/employee/';
-      final response = await http.get(
-        Uri.parse(apiUrl),
-        headers: {
-          'Authorization': access_token, // Include JWT in header
-          'Content-Type': 'application/json',
-        },
-      );
-      final responseBody = json.decode(response.body);
-      if (response.statusCode == 200 && responseBody["code"] == 200) {
-        setState(() {
-          employees =
-              responseBody["data"].map((employee) {
-                return {
-                  'id': employee['employee_id'].toString(),
-                  'name': employee['employee_name'] ?? 'No Name',
-                  'department': employee['department'] ?? 'No Department',
-                  'type': employee['user_type'] ?? 'Regular User',
-                };
-              }).toList();
-        });
-      } else {
-        throw Exception('Failed to load employees: ${response.statusCode}');
-      }
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Error fetching employees: ${e.toString()}';
-      });
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
+  if (globals.token == "") {
+    setState(() {
+      errorMessage = "No token found";
+    });
+    return;
   }
 
+  setState(() {
+    isLoading = true;
+    errorMessage = '';
+  });
+
+  try {
+    const apiUrl = 'http://172.191.111.81:8081/api/employee/';
+    final response = await http.get(
+      Uri.parse(apiUrl),
+      headers: {
+        'Authorization': globals.token, // Add Bearer prefix
+        'Content-Type': 'application/json',
+      },
+    );
+
+    print('Status Code: ${response.statusCode}');
+    print('Response Body: "${response.body}"');
+
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final decoded = json.decode(response.body);
+
+      if (decoded["code"] == 200 && decoded["data"] is List) {
+        setState(() {
+          employees = decoded["data"].map((employee) {
+            return {
+              'id': employee['employee_id'].toString(),
+              'name': employee['employee_name'] ?? 'No Name',
+              'department': employee['department'] ?? 'No Department',
+              'type': employee['user_type'] ?? 'Regular User',
+            };
+          }).toList();
+        });
+      } else {
+        setState(() {
+          errorMessage = 'Invalid data format';
+        });
+      }
+    } else {
+      setState(() {
+        errorMessage = 'Failed to fetch employees: ${response.statusCode}';
+      });
+    }
+  } catch (e) {
+    setState(() {
+      errorMessage = 'Error fetching employees: ${e.toString()}';
+    });
+  } finally {
+    setState(() {
+      isLoading = false;
+    });
+  }
+}
+
+
   Future<void> _deleteEmployee(String employeeId) async {
+    if (globals.token == "") {
+    setState(() {
+      errorMessage = "No token found";
+    });
+    return;
+  }
+
+  setState(() {
+    isLoading = true;
+    errorMessage = '';
+  });
     try {
       // Replace with your actual API endpoint
-      final apiUrl = 'http://your-api-endpoint.com/api/employees/$employeeId';
-      final response = await http.delete(Uri.parse(apiUrl));
+      final apiUrl = 'http://172.191.111.81:8081/api/employee/$employeeId';
+      final response = await http.delete(
+      Uri.parse(apiUrl),
+      headers: {
+        'Authorization': globals.token,
+      },
+    );
 
       if (response.statusCode == 200) {
         // Refresh the employee list after successful deletion
@@ -271,8 +297,19 @@ class _EmployeePageState extends State<EmployeePage> {
                                       children: [
                                         ElevatedButton.icon(
                                           onPressed: () {
-                                            // TODO: Implement edit functionality
-                                            // Navigator.push(...)
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => EditEmployeePage(
+                                                  id: emp['id']!,
+                                                  name: emp['name']!,
+                                                  department: emp['department'] ?? '',
+                                                  type: emp['type'] ?? '',
+                                                ),
+                                              ),
+                                            ).then((_) {
+                                              _fetchEmployees(); // Refresh after editing
+                                            });
                                           },
                                           icon: const Icon(
                                             Icons.edit,

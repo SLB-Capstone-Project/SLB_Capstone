@@ -5,8 +5,8 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 String globalToken = '';
-const String apiUsername = "Admin";
-const String apiPassword = "123456";
+const String apiUsername = "Bob Lin";
+const String apiPassword = "bob456";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -163,7 +163,7 @@ class _CheckInPageState extends State<CheckInPage> {
         // 'Authorization': globalToken,
       },
       body: jsonEncode({
-        'part_id': currentPartId,
+        'part_id': 105,
         // 'employee_id': 2,
       }),
     );
@@ -204,7 +204,7 @@ class _CheckInPageState extends State<CheckInPage> {
         'Authorization': globalToken,
       },
       body: jsonEncode({
-        'part_id': currentPartId,
+        'part_id': 130,
         // 'employee_id': 2,
       }),
     );

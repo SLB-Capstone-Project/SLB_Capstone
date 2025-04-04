@@ -154,37 +154,28 @@ class _CheckInPageState extends State<CheckInPage> {
       scanResultColor = Colors.blue;
     });
 
-    try {
-      final url = Uri.parse('http://172.191.111.81:8081/api/activities/borrow');
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${globalToken.trim()}',
-          // 'Authorization': globalToken,
-        },
-        body: jsonEncode({
-          'part_id': currentPartId,
-          'employee_id': 2,
-        }),
-      );
+    final url = Uri.parse('http://172.191.111.81:8081/api/activities/borrow');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': globalToken,
+        // 'Authorization': globalToken,
+      },
+      body: jsonEncode({
+        'part_id': currentPartId,
+        // 'employee_id': 2,
+      }),
+    );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          scanResultMessage = data['message'] ?? 'Borrow operation successful';
-          scanResultColor = Colors.green;
-        });
-      } else {
-        throw Exception('HTTP ${response.statusCode}: ${response.body}');
-      }
-    } catch (e) {
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
       setState(() {
-        scanResultMessage = 'Borrow error: $e';
-        scanResultColor = Colors.red;
+        scanResultMessage = 'Borrow operation successful';
+        scanResultColor = Colors.green;
       });
-    } finally {
-      setState(() => isLoading = false);
+    } else {
+      throw Exception('HTTP ${response.statusCode}: ${response.body}');
     }
   }
 
@@ -204,37 +195,28 @@ class _CheckInPageState extends State<CheckInPage> {
       scanResultColor = Colors.blue;
     });
 
-    try {
-      final url = Uri.parse('http://172.191.111.81:8081/api/activities/return');
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${globalToken.trim()}',
-          // 'Authorization': globalToken,
-        },
-        body: jsonEncode({
-          'part_id': currentPartId,
-          'employee_id': 2,
-        }),
-      );
+    final url = Uri.parse('http://172.191.111.81:8081/api/activities/return');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        // 'Authorization': 'Bearer ${globalToken.trim()}',
+        'Authorization': globalToken,
+      },
+      body: jsonEncode({
+        'part_id': currentPartId,
+        // 'employee_id': 2,
+      }),
+    );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          scanResultMessage = data['message'] ?? 'Return operation successful';
-          scanResultColor = Colors.green;
-        });
-      } else {
-        throw Exception('HTTP ${response.statusCode}: ${response.body}');
-      }
-    } catch (e) {
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
       setState(() {
-        scanResultMessage = 'Return error: $e';
-        scanResultColor = Colors.red;
+        scanResultMessage = 'Return operation successful';
+        scanResultColor = Colors.green;
       });
-    } finally {
-      setState(() => isLoading = false);
+    } else {
+      throw Exception('HTTP ${response.statusCode}: ${response.body}');
     }
   }
 

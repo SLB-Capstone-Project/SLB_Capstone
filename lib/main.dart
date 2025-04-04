@@ -323,31 +323,18 @@ class _CheckInPageState extends State<CheckInPage> {
                         foregroundColor: Colors.white,
                         minimumSize: const Size(120, 48),
                       ),
-                      onPressed: isLoading
-                          ? null
-                          : () {
-                        setState(() {
-                          scanResultMessage = '';
-                          scanResultColor = Colors.transparent;
-                        });
-                      },
-                      child: const Text('Clear'),
-                    ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.brown,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(120, 48),
-                      ),
-                      onPressed: isLoading
-                          ? null
-                          : () {
+                      onPressed: isLoading ? null : () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => ManualInputPage(
-                              onBarcodeSubmitted: (barcode) {
-                                processBarcode(barcode);
+                              onPartIdSubmitted: (partId) {
+                                setState(() {
+                                  currentPartId = partId;
+                                  scanResultMessage = 'Part ID set: $partId';
+                                  scanResultColor = Colors.green;
+                                  _historyRecords.add('${_historyRecords.length + 1}. Part ID: $partId');
+                                });
                               },
                             ),
                           ),
@@ -395,8 +382,8 @@ class _CheckInPageState extends State<CheckInPage> {
 }
 
 class ManualInputPage extends StatefulWidget {
-  final Function(String)? onBarcodeSubmitted;
-  const ManualInputPage({Key? key, this.onBarcodeSubmitted}) : super(key: key);
+  final Function(int)? onPartIdSubmitted;
+  const ManualInputPage({Key? key, this.onPartIdSubmitted}) : super(key: key);
   @override _ManualInputPageState createState() => _ManualInputPageState();
 }
 
@@ -407,10 +394,11 @@ class _ManualInputPageState extends State<ManualInputPage> {
   bool isLoading = false;
 
   void processManualInput() {
-    final barcode = _barcodeController.text;
-    if (barcode.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(barcode)) {
+    final input = _barcodeController.text;
+
+    if (!RegExp(r'^[0-9]+$').hasMatch(input) || input.length > 6) {
       setState(() {
-        scanResultMessage = 'Invalid barcode: must be 10 digits';
+        scanResultMessage = 'Invalid input: must be up to 6 digits';
         scanResultColor = Colors.red;
       });
       return;
@@ -422,12 +410,15 @@ class _ManualInputPageState extends State<ManualInputPage> {
       scanResultColor = Colors.blue;
     });
 
-    if (widget.onBarcodeSubmitted != null) {
-      widget.onBarcodeSubmitted!(barcode);
+    // 去零处理并转换为整数
+    int partId = int.parse(input);
+
+    if (widget.onPartIdSubmitted != null) {
+      widget.onPartIdSubmitted!(partId);
     }
 
     setState(() {
-      scanResultMessage = 'Barcode accepted';
+      scanResultMessage = 'Part ID accepted: $partId';
       scanResultColor = Colors.green;
       isLoading = false;
     });
@@ -440,7 +431,7 @@ class _ManualInputPageState extends State<ManualInputPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Manual Input'),
+        title: const Text('Manual Input Part ID'),
         backgroundColor: Colors.brown,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -463,8 +454,11 @@ class _ManualInputPageState extends State<ManualInputPage> {
               children: [
                 TextField(
                   controller: _barcodeController,
+                  keyboardType: TextInputType.number,
+                  maxLength: 6,
+                  style: const TextStyle(color: Colors.white),
                   decoration: const InputDecoration(
-                    labelText: 'Enter Barcode',
+                    labelText: 'Enter Part ID (up to 6 digits)',
                     labelStyle: TextStyle(color: Colors.white),
                     border: OutlineInputBorder(),
                     enabledBorder: OutlineInputBorder(
@@ -474,9 +468,6 @@ class _ManualInputPageState extends State<ManualInputPage> {
                       borderSide: BorderSide(color: Colors.brown, width: 2),
                     ),
                   ),
-                  keyboardType: TextInputType.number,
-                  maxLength: 10,
-                  style: const TextStyle(color: Colors.white),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
@@ -514,6 +505,7 @@ class _ManualInputPageState extends State<ManualInputPage> {
     );
   }
 }
+
 
 class HistoryPage extends StatefulWidget {
   final List<String> historyRecords;

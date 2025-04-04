@@ -28,7 +28,7 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
     _tabController = TabController(vsync: this, length: myTabs.length);
     http_funct.getUserProducts().then((List result) {
       //result contains a list of parts 
-      print(result[0]);
+      //print(result[0]);
       for(int i = 0; i < result.length; i++) {
         product_arr.add("Product ID: ${result[i]['productId']} \n"
           "ProductName: ${result[i]['productName']}");

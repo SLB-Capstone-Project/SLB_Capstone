@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:namer_app/login_files/login_screen.dart';
 import 'camera_page.dart';
-import 'inventory.dart';
-import 'tabbed_inventory.dart';
+//import 'inventory.dart';
+//import 'tabbed_inventory.dart';
+import 'checkin_files/checkin_page.dart';
+import 'inventory_files/user_inventory.dart';
 import 'admin/admin_main.dart';
 import "globals.dart" as globals;
 //import 'package:http/http.dart';
@@ -261,7 +263,7 @@ class InventoryState extends State<Inventory> {
           }
         ),
       ),
-      body: TabbedInventory(),
+      body: UserInventory(),
     );
   }
 }

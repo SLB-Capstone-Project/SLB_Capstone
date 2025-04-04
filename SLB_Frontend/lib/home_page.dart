@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'camera_page.dart';
-import 'inventory.dart';
-import 'tabbed_inventory.dart';
+import 'inventory_files/inventory.dart';
+import 'inventory_files/tabbed_inventory.dart';
+import 'inventory_files/user_inventory.dart' as user;
 //import 'package:http/http.dart';
 //import 'login_files/login_screen.dart';
 
@@ -45,7 +46,7 @@ class HomePageState extends State<HomePage> {
           color: Colors.white,
           onPressed: () async {
             //getData();
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const TabbedInventory()));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const user.UserInventory()));
           }
         ),
       ),

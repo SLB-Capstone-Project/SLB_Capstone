@@ -4,60 +4,13 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/services.dart';
 
-String globalToken = '';
-const String apiUsername = 'Bob Lin';
-const String apiPassword = 'bob456';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  try {
-    globalToken = await fetchAuthToken();
-    print('Token successfully obtained: ${globalToken.substring(0, 10)}...');
-    runApp(const MyApp());
-  } catch (e) {
-    print('Failed to get token: $e');
-    runApp(const TokenErrorApp());
-  }
-}
-
-class TokenErrorApp extends StatelessWidget {
-  const TokenErrorApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Unaccessible, network connection error\n: $globalToken'),
-        ),
-      ),
-    );
-  }
-}
-
-Future<String> fetchAuthToken() async {
-  final url = Uri.parse('http://172.191.111.81:8081/login');
-  final response = await http.post(
-    url,
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'employee_name': apiUsername,
-      'password': apiPassword,
-    }),
-  );
-
-  if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['token'] ?? data['access_token'] ?? '';
-  } else {
-    throw Exception('Failed to get token: ${response.statusCode}');
-  }
+void main() {
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
+ 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -72,19 +25,18 @@ class MyApp extends StatelessWidget {
 
 class CheckInPage extends StatefulWidget {
   const CheckInPage({super.key});
-
+ 
   @override
   State<CheckInPage> createState() => _CheckInPageState();
 }
-
+ 
 class _CheckInPageState extends State<CheckInPage> {
   String scannedBarcode = 'not scanned yet';
   String scanResultMessage = '';
   Color scanResultColor = Colors.transparent;
   bool isLoading = false;
   final List<String> _historyRecords = [];
-  int? currentPartId;
-
+ 
   Future<void> scanBarcode() async {
     try {
       var result = await barcode_scan.BarcodeScanner.scan();
@@ -99,14 +51,14 @@ class _CheckInPageState extends State<CheckInPage> {
       });
     }
   }
-
+ 
   Future<void> scanBarcodeFromImage() async {
     setState(() {
       scanResultMessage = 'Scan from image is currently unavailable';
       scanResultColor = Colors.red;
     });
   }
-
+ 
   Future<void> processBarcode(String barcode) async {
     if (barcode.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(barcode)) {
       setState(() {
@@ -115,123 +67,74 @@ class _CheckInPageState extends State<CheckInPage> {
       });
       return;
     }
-
+ 
     String categoryId = barcode.substring(0, 4);
     String componentId = barcode.substring(4);
-
+ 
+    int categoryIdNum = int.parse(categoryId);
+    int componentIdNum = int.parse(componentId);
+ 
     setState(() {
       isLoading = true;
-      scanResultMessage = 'Barcode scanned: $categoryId $componentId';
-      scanResultColor = Colors.green;
-      currentPartId = int.parse(componentId);
-      _historyRecords.add('${_historyRecords.length + 1}. $categoryId $componentId');
-      isLoading = false;
-    });
-  }
-
-  Future<void> borrowItem() async {
-    if (currentPartId == null) {
-      setState(() {
-        scanResultMessage = 'Please scan a barcode first';
-        scanResultColor = Colors.red;
-      });
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-      scanResultMessage = 'Processing borrow...';
+      scanResultMessage = 'Processing...';
       scanResultColor = Colors.blue;
     });
-
+ 
     try {
-      final url = Uri.parse('http://172.191.111.81:8081/api/activities/borrow');
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $globalToken',
-        },
-        body: jsonEncode({
-          'part_id': currentPartId,
-          'employee_id': 2,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          scanResultMessage = data['message'] ?? 'Borrow operation successful';
+      final response = await sendPostRequest(categoryIdNum, componentIdNum);
+ 
+      setState(() {
+        _historyRecords.add('${_historyRecords.length + 1}. ${categoryId} ${componentId}');
+        if (response['success'] == true) {
+          scanResultMessage = 'Scan successful - ${response['message'] ?? 'Data saved'}';
           scanResultColor = Colors.green;
-        });
-      } else {
-        throw Exception('HTTP ${response.statusCode}: ${response.body}');
-      }
+        } else {
+          scanResultMessage = 'Error: ${response['message'] ?? 'Unknown error'}';
+          scanResultColor = Colors.orange;
+        }
+      });
     } catch (e) {
       setState(() {
-        scanResultMessage = 'Borrow error: $e';
+        scanResultMessage = 'Server error: ${e.toString()}';
         scanResultColor = Colors.red;
       });
     } finally {
-      setState(() => isLoading = false);
+      setState(() {
+        isLoading = false;
+      });
     }
   }
-
-  Future<void> returnItem() async {
-    if (currentPartId == null) {
-      setState(() {
-        scanResultMessage = 'Please scan a barcode first';
-        scanResultColor = Colors.red;
-      });
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-      scanResultMessage = 'Processing return...';
-      scanResultColor = Colors.blue;
-    });
-
-    try {
-      final url = Uri.parse('http://172.191.111.81:8081/api/activities/return');
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $globalToken',
-        },
-        body: jsonEncode({
-          'part_id': currentPartId,
-          'employee_id': 2,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          scanResultMessage = data['message'] ?? 'Return operation successful';
-          scanResultColor = Colors.green;
-        });
-      } else {
-        throw Exception('HTTP ${response.statusCode}: ${response.body}');
-      }
-    } catch (e) {
-      setState(() {
-        scanResultMessage = 'Return error: $e';
-        scanResultColor = Colors.red;
-      });
-    } finally {
-      setState(() => isLoading = false);
+ 
+  Future<Map<String, dynamic>> sendPostRequest(int categoryId, int componentId) async {
+    final url = Uri.parse('http://172.191.111.81:8081/api/components');
+ 
+    final response = await http.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'category_id': categoryId,
+        'component_id': componentId,
+        'timestamp': DateTime.now().toIso8601String(),
+      }),
+    );
+ 
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to send data. Status code: ${response.statusCode}. Response: ${response.body}');
     }
   }
-
+  
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.black, 
       appBar: AppBar(
         title: const Text('Scanner Page'),
-        backgroundColor: Colors.brown,
+        backgroundColor: Colors.brown, 
         toolbarHeight: 60.0,
         titleTextStyle: const TextStyle(
           fontSize: 32.0,
@@ -259,12 +162,12 @@ class _CheckInPageState extends State<CheckInPage> {
                 ),
                 ElevatedButton(
                   onPressed: isLoading ? null : scanBarcode,
+                  child: const Text('Start scanning barcode'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.brown,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   ),
-                  child: const Text('Start scanning barcode'),
                 ),
                 Text(
                   scanResultMessage,
@@ -283,37 +186,14 @@ class _CheckInPageState extends State<CheckInPage> {
                         foregroundColor: Colors.white,
                         minimumSize: const Size(120, 48),
                       ),
-                      onPressed: isLoading ? null : borrowItem,
-                      child: const Text('Borrow'),
-                    ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.brown,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(120, 48),
-                      ),
-                      onPressed: isLoading ? null : returnItem,
-                      child: const Text('Return'),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.brown,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(120, 48),
-                      ),
                       onPressed: isLoading
                           ? null
                           : () {
-                        setState(() {
-                          scanResultMessage = '';
-                          scanResultColor = Colors.transparent;
-                        });
-                      },
+                              setState(() {
+                                scanResultMessage = '';
+                                scanResultColor = Colors.transparent;
+                              });
+                            },
                       child: const Text('Clear'),
                     ),
                     ElevatedButton(
@@ -325,17 +205,17 @@ class _CheckInPageState extends State<CheckInPage> {
                       onPressed: isLoading
                           ? null
                           : () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ManualInputPage(
-                              onBarcodeSubmitted: (barcode) {
-                                processBarcode(barcode);
-                              },
-                            ),
-                          ),
-                        );
-                      },
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ManualInputPage(
+                                    onBarcodeSubmitted: (barcode) {
+                                      processBarcode(barcode);
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
                       child: const Text('Manual Input'),
                     ),
                   ],
@@ -344,19 +224,19 @@ class _CheckInPageState extends State<CheckInPage> {
                   onPressed: isLoading
                       ? null
                       : () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HistoryPage(historyRecords: _historyRecords),
-                      ),
-                    );
-                  },
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => HistoryPage(historyRecords: _historyRecords),
+                            ),
+                          );
+                        },
+                  child: const Text('History'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.brown,
                     foregroundColor: Colors.white,
                     minimumSize: const Size(120, 48),
                   ),
-                  child: const Text('History'),
                 ),
                 const SizedBox(height: 16.0),
               ],
@@ -376,19 +256,22 @@ class _CheckInPageState extends State<CheckInPage> {
     );
   }
 }
-
+ 
 class ManualInputPage extends StatefulWidget {
   final Function(String)? onBarcodeSubmitted;
+ 
   const ManualInputPage({Key? key, this.onBarcodeSubmitted}) : super(key: key);
-  @override _ManualInputPageState createState() => _ManualInputPageState();
+ 
+  @override
+  _ManualInputPageState createState() => _ManualInputPageState();
 }
-
+ 
 class _ManualInputPageState extends State<ManualInputPage> {
   final TextEditingController _barcodeController = TextEditingController();
   String scanResultMessage = '';
   Color scanResultColor = Colors.transparent;
   bool isLoading = false;
-
+ 
   void processManualInput() {
     final barcode = _barcodeController.text;
     if (barcode.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(barcode)) {
@@ -398,26 +281,26 @@ class _ManualInputPageState extends State<ManualInputPage> {
       });
       return;
     }
-
+ 
     setState(() {
       isLoading = true;
       scanResultMessage = 'Processing...';
       scanResultColor = Colors.blue;
     });
-
+ 
     if (widget.onBarcodeSubmitted != null) {
       widget.onBarcodeSubmitted!(barcode);
     }
-
+ 
     setState(() {
-      scanResultMessage = 'Barcode accepted';
+      scanResultMessage = 'Scan correct';
       scanResultColor = Colors.green;
       isLoading = false;
     });
-
+ 
     Navigator.pop(context);
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -464,12 +347,12 @@ class _ManualInputPageState extends State<ManualInputPage> {
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: isLoading ? null : processManualInput,
+                  child: const Text('Confirm'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.brown,
                     foregroundColor: Colors.white,
                     minimumSize: const Size(double.infinity, 50),
                   ),
-                  child: const Text('Confirm'),
                 ),
                 const SizedBox(height: 20),
                 Text(
@@ -497,29 +380,57 @@ class _ManualInputPageState extends State<ManualInputPage> {
     );
   }
 }
-
+ 
 class HistoryPage extends StatefulWidget {
   final List<String> historyRecords;
+ 
   const HistoryPage({Key? key, required this.historyRecords}) : super(key: key);
-  @override _HistoryPageState createState() => _HistoryPageState();
+ 
+  @override
+  _HistoryPageState createState() => _HistoryPageState();
 }
-
+ 
 class _HistoryPageState extends State<HistoryPage> {
   final ScrollController _scrollController = ScrollController();
   String _selectedText = '';
-
-  void _clearHistory() => setState(() => widget.historyRecords.clear());
-  void _scrollToTop() => _scrollController.animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
-  void _scrollToBottom() => _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
-  void _copyAllText() {
-    Clipboard.setData(ClipboardData(text: widget.historyRecords.join('\n')));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('All content copied to clipboard')));
+ 
+  void _clearHistory() {
+    setState(() {
+      widget.historyRecords.clear();
+    });
   }
+ 
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+ 
+  void _scrollToBottom() {
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+ 
+  void _copyAllText() {
+    final allText = widget.historyRecords.join('\n');
+    Clipboard.setData(ClipboardData(text: allText));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('All content copied to clipboard')),
+    );
+  }
+ 
   void _copySelectedText(String text) {
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Selected content copied to clipboard')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Selected content copied to clipboard')),
+    );
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -531,12 +442,21 @@ class _HistoryPageState extends State<HistoryPage> {
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
-        actions: [IconButton(icon: const Icon(Icons.copy), tooltip: 'Copy all', onPressed: _copyAllText)],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.copy),
+            tooltip: 'Copy all',
+            onPressed: _copyAllText,
+          ),
+        ],
       ),
       backgroundColor: Colors.black,
       body: Column(
         children: [
-          IconButton(icon: const Icon(Icons.arrow_upward, color: Colors.white), onPressed: _scrollToTop),
+          IconButton(
+            icon: const Icon(Icons.arrow_upward, color: Colors.white),
+            onPressed: _scrollToTop,
+          ),
           Expanded(
             child: Scrollbar(
               controller: _scrollController,
@@ -544,31 +464,54 @@ class _HistoryPageState extends State<HistoryPage> {
                 controller: _scrollController,
                 padding: const EdgeInsets.all(16.0),
                 child: SelectableText.rich(
-                  TextSpan(children: widget.historyRecords.map((record) => TextSpan(text: '$record\n', style: const TextStyle(fontSize: 18, color: Colors.white))).toList()),
+                  TextSpan(
+                    children: widget.historyRecords.map((record) {
+                      return TextSpan(
+                        text: '$record\n',
+                        style: const TextStyle(fontSize: 18, color: Colors.white),
+                      );
+                    }).toList(),
+                  ),
                   style: const TextStyle(fontFamily: 'monospace'),
                 ),
               ),
             ),
           ),
-          IconButton(icon: const Icon(Icons.arrow_downward, color: Colors.white), onPressed: _scrollToBottom),
+          IconButton(
+            icon: const Icon(Icons.arrow_downward, color: Colors.white),
+            onPressed: _scrollToBottom,
+          ),
           if (_selectedText.isNotEmpty)
             ElevatedButton(
               onPressed: () => _copySelectedText(_selectedText),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.brown, foregroundColor: Colors.white),
               child: const Text('Copy Selected'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.brown,
+                foregroundColor: Colors.white,
+              ),
             ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.brown, foregroundColor: Colors.white, minimumSize: const Size(120, 48)),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
                 child: const Text('Return'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.brown,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(120, 48),
+                ),
               ),
               ElevatedButton(
                 onPressed: _clearHistory,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.brown, foregroundColor: Colors.white, minimumSize: const Size(120, 48)),
                 child: const Text('Clear'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.brown,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(120, 48),
+                ),
               ),
             ],
           ),

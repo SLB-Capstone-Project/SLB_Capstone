@@ -69,7 +69,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomePage()),
+          MaterialPageRoute(
+            builder:
+                (context) => PopScope(
+                  canPop: false, // Prevent going back
+                  child: HomePage(),
+                ),
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

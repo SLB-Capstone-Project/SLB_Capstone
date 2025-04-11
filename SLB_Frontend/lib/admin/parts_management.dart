@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'add_parts.dart';
 import 'edit_part.dart';
 import 'part_detail.dart';
+import '../globals.dart' as globals;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class PartManagementPage extends StatefulWidget {
   const PartManagementPage({super.key});
@@ -12,28 +15,83 @@ class PartManagementPage extends StatefulWidget {
 
 class _PartManagementPageState extends State<PartManagementPage> {
   final TextEditingController searchController = TextEditingController();
+  String errorMessage = '';
+  List<dynamic> parts = [];
+  bool isLoading = true;
 
-  List<Map<String, String>> parts = [
-    {
-      'id': 'P001',
-      'name': 'Gearbox',
-      'category': 'Mechanical',
-      'type': 'Product',
-    },
-    {'id': 'P002', 'name': 'Sensor', 'category': 'Electronics', 'type': 'Part'},
-    {'id': 'P003', 'name': 'Valve', 'category': 'Hydraulics', 'type': 'Part'},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchParts();
+  }
 
-  String searchQuery = '';
+  Future<void> _fetchParts() async {
+    if (globals.token.isEmpty) {
+      setState(() {
+        errorMessage = "No token found";
+        isLoading = false;
+      });
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+      errorMessage = '';
+    });
+
+    try {
+      const apiUrl = 'http://172.191.111.81:8081/api/components';
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Authorization': globals.token,
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        if (response.body.isNotEmpty) {
+          final decoded = json.decode(response.body);
+          setState(() {
+            parts =
+                decoded.map((part) {
+                  return {
+                    'partId': part['partId']?.toString() ?? 'N/A',
+                    'partName': part['partName'] ?? 'Unknown',
+                    'status': part['status'] ?? 'Unknown',
+                    'productId': part['productId']?.toString() ?? 'N/A',
+                    'productName': part['productName'] ?? 'Unknown',
+                    'cost': part['cost']?.toString() ?? '0.00',
+                    'borrowedEmployeeId':
+                        part['borrowedEmployeeId']?.toString() ?? 'None',
+                  };
+                }).toList();
+          });
+        }
+      } else {
+        setState(() {
+          errorMessage = 'Failed to fetch parts: ${response.statusCode}';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error fetching parts: ${e.toString()}';
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final searchQuery = searchController.text.toLowerCase();
     final filteredParts =
-        parts.where((item) {
-          final query = searchQuery.toLowerCase();
-          return item['name']!.toLowerCase().contains(query) ||
-              item['category']!.toLowerCase().contains(query) ||
-              item['id']!.contains(query);
+        parts.where((part) {
+          return part['partId'].toLowerCase().contains(searchQuery) ||
+              part['partName'].toLowerCase().contains(searchQuery) ||
+              part['status'].toLowerCase().contains(searchQuery);
         }).toList();
 
     return Scaffold(
@@ -45,6 +103,12 @@ class _PartManagementPageState extends State<PartManagementPage> {
         ),
         backgroundColor: Colors.black,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            onPressed: _fetchParts,
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -52,14 +116,10 @@ class _PartManagementPageState extends State<PartManagementPage> {
           children: [
             TextField(
               controller: searchController,
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value;
-                });
-              },
+              onChanged: (_) => setState(() {}),
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                hintText: 'Search...',
+                hintText: 'Search by ID, name or status...',
                 hintStyle: const TextStyle(color: Colors.grey),
                 filled: true,
                 fillColor: Colors.grey[900],
@@ -70,102 +130,137 @@ class _PartManagementPageState extends State<PartManagementPage> {
               ),
             ),
             const SizedBox(height: 20),
-            const Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'ID',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    'Name',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    'Type',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 40),
-              ],
-            ),
-            const Divider(color: Colors.grey),
-            Expanded(
-              child: ListView.builder(
-                itemCount: filteredParts.length,
-                itemBuilder: (context, index) {
-                  final part = filteredParts[index];
 
-                  return Column(
-                    children: [
-                      Row(
+            if (errorMessage.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(
+                  errorMessage,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+
+            if (isLoading)
+              const Expanded(child: Center(child: CircularProgressIndicator()))
+            else ...[
+              const Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Part ID',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Part Name',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Status',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 40),
+                ],
+              ),
+              const Divider(color: Colors.grey),
+
+              if (filteredParts.isEmpty)
+                const Expanded(
+                  child: Center(
+                    child: Text(
+                      'No parts found',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                )
+              else
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: filteredParts.length,
+                    itemBuilder: (context, index) {
+                      final part = filteredParts[index];
+                      return Column(
                         children: [
-                          Expanded(
-                            child: Text(
-                              part['id']!,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              part['name']!,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              part['type']!,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.arrow_forward_ios,
-                              color: Colors.white70,
-                            ),
-                            onPressed: () {
+                          InkWell(
+                            onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder:
                                       (_) => PartDetailPage(
-                                        id: part['id']!,
-                                        name: part['name']!,
-                                        category: part['category']!,
-                                        type: part['type']!,
+                                        partId: part['partId'],
+                                        partName: part['partName'],
+                                        status: part['status'],
+                                        productId: part['productId'],
+                                        productName: part['productName'],
+                                        cost: part['cost'],
+                                        borrowedEmployeeId:
+                                            part['borrowedEmployeeId'],
                                       ),
                                 ),
-                              );
+                              ).then((_) => _fetchParts());
                             },
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    part['partId'],
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    part['partName'],
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    part['status'],
+                                    style: TextStyle(
+                                      color:
+                                          part['status'] == 'Available'
+                                              ? Colors.green
+                                              : Colors.orange,
+                                    ),
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Colors.white70,
+                                  size: 16,
+                                ),
+                              ],
+                            ),
                           ),
+                          const Divider(color: Colors.grey),
                         ],
-                      ),
-                      const Divider(color: Colors.grey),
-                    ],
-                  );
-                },
-              ),
-            ),
+                      );
+                    },
+                  ),
+                ),
+            ],
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const AddPartPage()),
                 );
+                _fetchParts();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF7B544C),

@@ -37,7 +37,9 @@ class ManagementSelectionPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const EmployeePage()),
+                    MaterialPageRoute(
+                      builder: (context) => const EmployeePage(),
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -60,7 +62,9 @@ class ManagementSelectionPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const PartManagementPage()),
+                    MaterialPageRoute(
+                      builder: (context) => const PartManagementPage(),
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(

@@ -26,12 +26,12 @@ class _EmployeePageState extends State<EmployeePage> {
   }
 
   Future<void> _fetchEmployees() async {
-    // if (globals.token == "") {
-    //   setState(() {
-    //     errorMessage = "No token found";
-    //   });
-    //   return;
-    // }
+    if (globals.token == "") {
+      setState(() {
+        errorMessage = "No token found";
+      });
+      return;
+    }
 
     setState(() {
       isLoading = true;
@@ -39,68 +39,40 @@ class _EmployeePageState extends State<EmployeePage> {
     });
 
     try {
-      //  API call commented out
-      // const apiUrl = 'http://172.191.111.81:8081/api/employee/';
-      // final response = await http.get(
-      //   Uri.parse(apiUrl),
-      //   headers: {
-      //     'Authorization': globals.token,
-      //     'Content-Type': 'application/json',
-      //   },
-      // );
+      const apiUrl = 'http://172.191.111.81:8081/api/employee/';
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Authorization': globals.token,
+          'Content-Type': 'application/json',
+        },
+      );
 
-      // if (response.statusCode == 200 && response.body.isNotEmpty) {
-      //   final decoded = json.decode(response.body);
+      if (response.statusCode == 200 && response.body.isNotEmpty) {
+        final decoded = json.decode(response.body);
 
-      //   if (decoded["code"] == 200 && decoded["data"] is List) {
-      //     setState(() {
-      //       employees = decoded["data"].map((employee) {
-      //         return {
-      //           'id': employee['employee_id'].toString(),
-      //           'name': employee['employee_name'] ?? 'No Name',
-      //           'department': employee['department'] ?? 'No Department',
-      //           'type': employee['user_type'] ?? 'Regular User',
-      //         };
-      //       }).toList();
-      //     });
-      //   } else {
-      //     setState(() {
-      //       errorMessage = 'Invalid data format';
-      //     });
-      //   }
-      // } else {
-      //   setState(() {
-      //     errorMessage = 'Failed to fetch employees: \${response.statusCode}';
-      //   });
-      // }
-
-      // ✅ Using mock data for development
-      await Future.delayed(
-        const Duration(milliseconds: 500),
-      ); // Simulate network delay
-
-      setState(() {
-        employees = [
-          {
-            'id': '001',
-            'name': 'Alice Johnson',
-            'department': 'Engineering',
-            'type': 'Admin',
-          },
-          {
-            'id': '002',
-            'name': 'Bob Smith',
-            'department': 'Marketing',
-            'type': 'Normal',
-          },
-          {
-            'id': '003',
-            'name': 'Carol Lee',
-            'department': 'HR',
-            'type': 'Normal',
-          },
-        ];
-      });
+        if (decoded["code"] == 200 && decoded["data"] is List) {
+          setState(() {
+            employees =
+                decoded["data"].map((employee) {
+                  return {
+                    'id': employee['employee_id'].toString(),
+                    'name': employee['employee_name'] ?? 'No Name',
+                    'department': employee['department'] ?? 'No Department',
+                    'type': employee['user_type'] ?? 'Regular User',
+                  };
+                }).toList();
+          });
+        } else {
+          setState(() {
+            errorMessage = 'Invalid data format';
+          });
+        }
+      } else {
+        setState(() {
+          errorMessage = 'Failed to fetch employees: \${response.statusCode}';
+        });
+      }
     } catch (e) {
       setState(() {
         errorMessage = 'Error fetching employees: \${e.toString()}';

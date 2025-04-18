@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:quiver/collection.dart';
 import 'tabbed_inventory.dart';
 import 'http_functions.dart' as http_funct;
 import 'dart:convert';
 import 'dart:io';
+import 'associativity.dart';
 //import '../globals.dart' as global;
 
 class UserInventory extends StatefulWidget {
@@ -19,7 +21,8 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
 
   List<String> part_arr = [];
   List<String> product_arr = [];
-  
+  var productmap = Multimap<String, String>();
+
   late TabController _tabController;
 
   @override
@@ -30,12 +33,20 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
       //result contains a list of parts 
       //print(result[0]);
       for(int i = 0; i < result.length; i++) {
+        productmap.add("Product ID: ${result[i]['productId']} "
+          "ProductName: ${result[i]['productName']}", 
+          "Part ID: ${result[i]['partId']} \n"
+        "partName: ${result[i]['partName']}");
         product_arr.add("Product ID: ${result[i]['productId']} \n"
           "ProductName: ${result[i]['productName']}");
-       part_arr.add( "Part ID: ${result[i]['partId']} \n"
+        part_arr.add( "Part ID: ${result[i]['partId']} \n"
         "partName: ${result[i]['partName']}");
       }
       product_arr = product_arr.toSet().toList();
+      print(productmap.toString());
+      print(productmap["Product ID: 1 "
+          "ProductName: Laptop"]);
+      //create new multimap to make multiple parts to a product
       setState(() {});
     });
 
@@ -70,7 +81,23 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
     return Scaffold(
       appBar: AppBar(
         title: Text('Inventory'),
-        bottom: TabBar(
+        backgroundColor: Colors.brown,
+        toolbarHeight: 60.0,
+        titleTextStyle: const TextStyle(
+          fontSize: 32.0,
+          fontWeight: FontWeight.bold,
+          color:  Color.fromRGBO(240, 240, 240, 1),
+        ),
+        leading: IconButton(  
+          icon: const Icon(Icons.home),
+          color: const Color.fromRGBO(240, 240, 240, 1),
+          onPressed: () {
+            Navigator.pop(context);
+          }
+        ),
+      bottom: TabBar(
+        labelColor: const Color.fromRGBO(240, 240, 240, 1),
+        unselectedLabelColor: const Color.fromRGBO(240, 240, 240, 1),
           controller: _tabController,
           tabs: myTabs,
         ),
@@ -80,21 +107,9 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
         children: [ 
           Column (
             children: [
-              TextField(  
+              //TextField(  
 
-              ),
-              /*FloatingActionButton( 
-                child: Text("Borrow product"),
-                onPressed: () {
-                  http_funct.borrowProduct();
-                }
-              ),
-              FloatingActionButton( 
-                child: Text("Return product"),
-                onPressed: () {
-                  //http_funct.returnProduct();
-                }
-              ),*/
+              //),           
               Expanded(
                 child: SizedBox(
                   height: 200,
@@ -104,8 +119,25 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
                     itemBuilder: (BuildContext context, int index) {
                       return ListTile(
                         leading: Text(product_arr[index]),
+                        //trailing: PopupMenuExample(),
+                        /*Pop(
+                          icon: const Icon(Icons.more_vert),
+                          onPressed: () {
+                            PopupMenuExample();
+                          }*/
+                        
+                        onTap: () {
+                          String temp = product_arr[index].replaceAll("\n", "");
+                          List<String> productList = productmap[temp].toList();
+                          print(productList);
+                          //print(temp);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => ProductList(productList: productList)),
+                          );
+                        }
                         //onTap: () => {remove_index(index)},
-                        );
+                      );
                     },
                     separatorBuilder: (BuildContext context, int index) => const Divider(),
                   ),
@@ -115,21 +147,9 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
           ),
           Column (
             children: [
-              TextField(  
+              //TextField(  
 
-              ),
-              /*FloatingActionButton( 
-                child: Text("Borrow product"),
-                onPressed: () {
-                  http_funct.borrowProduct();
-                }
-              ),
-              FloatingActionButton( 
-                child: Text("Return product"),
-                onPressed: () {
-                  //http_funct.returnProduct();
-                }
-              ),*/
+              //),
               Expanded(
                 child: SizedBox(
                   height: 200,
@@ -139,6 +159,8 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
                     itemBuilder: (BuildContext context, int index) {
                       return ListTile(
                         leading: Text(part_arr[index]),
+                        //trailing: Icon(Icons.more_vert),
+                        
                         //onTap: () => {remove_index(index)},
                         );
                     },
@@ -187,7 +209,10 @@ class _InventoryTileState extends State<InventoryTile> {
               //Text('Entry ${history_arr[index]}'),
               logout ? FloatingActionButton(  
                 onPressed: () {
-                  //sendData(widget.tileString);
+                  /*Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CheckInPage()),
+                  );*/
                 },
                 child: Text('Checkout'),
               ) : Container(),
@@ -196,5 +221,41 @@ class _InventoryTileState extends State<InventoryTile> {
         ),
       )
     );
+  }
+}
+
+enum SampleItem { Parts, Data}
+
+class PopupMenuExample extends StatefulWidget {
+  const PopupMenuExample({super.key});
+
+  @override
+  State<PopupMenuExample> createState() => _PopupMenuExampleState();
+}
+
+class _PopupMenuExampleState extends State<PopupMenuExample> {
+  SampleItem? selectedItem;
+
+  @override
+  Widget build(BuildContext context) {
+    //return Scaffold(
+    // appBar: AppBar(title: const Text('PopupMenuButton')),
+     // body: Center(
+       return PopupMenuButton<SampleItem>(
+          initialValue: selectedItem,
+          onSelected: (SampleItem item) {
+            setState(() {
+              selectedItem = item;
+            });
+          },
+          itemBuilder:
+              (BuildContext context) => <PopupMenuEntry<SampleItem>>[
+                const PopupMenuItem<SampleItem>(value: SampleItem.Parts, child: Text('Parts')),
+                const PopupMenuItem<SampleItem>(value: SampleItem.Data, child: Text('Data')),
+                //const PopupMenuItem<SampleItem>(value: SampleItem.itemThree, child: Text('Item 3')),
+              ],
+        );
+     // ),
+    //);
   }
 }

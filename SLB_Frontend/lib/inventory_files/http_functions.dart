@@ -47,10 +47,10 @@ Future<List> getUserProducts() async {
     }
   );
   if(response.statusCode == 200) {
-    //print(response.body);
+    print(response.body);
     final responseBody = jsonDecode(response.body);
     items = responseBody['data'];
-    //print(items);
+    print(items);
     //List temp =  jsonDecode(response.body);
     //print(items);
     /*for(int i = 0; i < items.length; i++) {
@@ -61,22 +61,11 @@ Future<List> getUserProducts() async {
       //print(temp[i]);
     }*/
   }
-  /*if(response.statusCode == 200) {
-    //print(response.body);
-    List temp =  jsonDecode(response.body);
-    for(int i = 0; i < temp.length; i++) {
-      string_arr.add("Product ID: ${temp[i]['productId']} \n"
-       "Number Available: ${temp[i]['numberPartInStock']} \n"
-       "Number Checked Out: ${temp[i]['numberPartCheckOut']}");
-      //print(temp[i]);
-    }
-  }*/
   else {
     print(response.statusCode);
     print(response.body);
     //throw Exception('Unable to connect');
   }
-  //return string_arr;
   return items;
 }
 
@@ -177,9 +166,9 @@ Future<List> getUserHistory() async {
     final responseBody = jsonDecode(response.body);
     items = responseBody['data'];
     for(int i = 0; i <   items.length; i++) {
-      global.historyList.insert(0, "Product ID: ${items[i]['productId']} \n"
-        "Part ID ${items[i]['partId']} \n"
-        "Action: ${items[i]['action']} \n"
+      global.historyList.insert(0, "Product ID: ${items[i]['productId']}"
+        "Part ID ${items[i]['partId']}"
+        "Action: ${items[i]['action']}"
         "Time : ${items[i]['operateTime']}");
     }
   }

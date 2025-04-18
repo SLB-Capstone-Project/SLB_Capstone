@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:namer_app/data_analysis.dart';
 import 'package:namer_app/login_files/login_screen.dart';
 //import 'inventory.dart';
 //import 'tabbed_inventory.dart';
@@ -40,7 +41,8 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold( 
-      backgroundColor: Colors.black,
+      backgroundColor: const Color.fromRGBO(10, 10, 10, 1),
+      //labelColor: const Color.fromRGBO(240, 240, 240, 1),
       appBar: AppBar(
         title: Text('Home Page'),
         backgroundColor: Colors.brown,
@@ -52,7 +54,7 @@ class HomePageState extends State<HomePage> {
         ),
       ),
       drawer: Drawer(
-        backgroundColor: Colors.black,
+        backgroundColor: const Color.fromRGBO(10, 10, 10, 1),
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
@@ -82,7 +84,7 @@ class HomePageState extends State<HomePage> {
                 Navigator.pop(context); // Close the drawer first
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => Inventory()),
+                  MaterialPageRoute(builder: (context) => UserInventory()),
                 );
               },
             ),
@@ -97,67 +99,90 @@ class HomePageState extends State<HomePage> {
                 );
               },
             ),
+            ListTile(
+              leading: Icon(Icons.scanner, color: Colors.white),
+              title: Text('Scanner', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CheckInPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.data_array_rounded, color: Colors.white),
+              title: Text('Data', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DataAnalysis()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.logout_rounded, color: Colors.white),
+              title: Text('Logout', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                );
+              },
+            ),
           ],
         ),
       ),
-
-      body: Center(  
+      body: Center( 
         child: Column(  
-          
           //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [  
             //Column(
              // children: [
-            SizedBox(height:30),
+            //SizedBox(height:30),
             Container( 
-              margin: EdgeInsets.symmetric(horizontal: 25),
+              //margin: EdgeInsets.symmetric(horizontal: 25),
               alignment: Alignment.centerLeft,
-              color: Colors.black,
-              //padding: EdgeInsets.all(20),
+              color: const Color.fromRGBO(10, 10, 10, 1),
+              padding: EdgeInsets.all(20),
               child: Text(
                 'Recent Activity',
+                style: TextStyle(  
+                  color: const Color.fromRGBO(240, 240, 240, 1),
+                  fontSize: 20,
+                ),
+              ),
+            ),
+            //SizedBox(height:15),
+            HistoryWindow(historyList: global.historyList),
+            //SizedBox(height:50),
+            Container( 
+              //margin: EdgeInsets.symmetric(horizontal: 25),
+              alignment: Alignment.centerLeft,
+              color: Colors.black,
+              padding: EdgeInsets.all(20),
+              child: Text(
+                'Notications',
                 style: TextStyle(  
                   color: Colors.white,
                   fontSize: 20,
                 ),
               ),
             ),
-            SizedBox(height:15),
-            HistoryWindow(historyList: global.historyList),
-            SizedBox(height:50),
-            Row( 
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [ 
-                SizedBox( 
-                  width: 100,
-                  height: 50,
-                  child: FloatingActionButton(  
-                    heroTag: null,
-                    onPressed: () {
-                      global.token = "";
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginScreen()),
-                      );
-                    },
-                    child: Text('Logout'),
-                  ),
+            Container( 
+              //margin: EdgeInsets.symmetric(horizontal: 25),
+              alignment: Alignment.centerLeft,
+              color: Colors.black,
+              //padding: EdgeInsets.all(20),
+              child: Text(
+                'None for now',
+                style: TextStyle(  
+                  color: Colors.white,
+                  fontSize: 18,
                 ),
-                SizedBox ( 
-                  width: 100,
-                  height: 50,
-                  child: FloatingActionButton(
-                    onPressed: () {
-                      //check_in('Item');
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => CheckInPage()),
-                      );
-                    },
-                    child: Text('Check In'),
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
         ),
@@ -174,9 +199,10 @@ class HistoryWindow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(5.0),
       child: Container( 
-        height:500,
+        //color: const Color.fromRGBO(60, 61, 55, 1),
+        height:300,
         width:350,
         /*decoration: BoxDecoration(  
           color: Colors.brown,
@@ -184,9 +210,8 @@ class HistoryWindow extends StatelessWidget {
           border: Border.all(
             width: 20,
           ),
-        ),*/
+        ),*/   
         child: CustomScrollView(
-          clipBehavior: Clip.hardEdge,
           slivers: <Widget>[
             SliverList(
               delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
@@ -202,73 +227,43 @@ class HistoryWindow extends StatelessWidget {
   }
 }
 
-class HistoryCard extends StatelessWidget {
-  final tileString;
-  final date;
-  const HistoryCard({super.key, required this.tileString, this.date});
+class HistoryCard extends StatefulWidget {
+  final String tileString;
+  const HistoryCard({super.key, required this.tileString});
+  @override
+  State<HistoryCard> createState() => _historyCardState();
 
+}
+
+class _historyCardState extends State<HistoryCard> {
+  late List<String> formattedText = [
+    widget.tileString.substring(widget.tileString.indexOf('Part ID') + 'Part ID'.length, widget.tileString.indexOf('Action')).trim(),
+    widget.tileString.substring(widget.tileString.indexOf('Action:') + 'Action:'.length, widget.tileString.indexOf('Time')).trim(),
+  ];
+  
+  @override 
+  /*void initState() {
+    print(widget.tileString);
+  }*/
   @override
   Widget build(BuildContext context) {
-    //return ClipRRect (  
-    //  borderRadius: BorderRadius.circular(20.0),
-    return Container( 
-      height: 120,
-      //padding: EdgeInsets.all(8.0),
-      //width: 300,
-      child: Card.outlined(  
-        //margin: EdgeInsets.zero,
-        color: Colors.black,
-        child: Container(  
-          padding: EdgeInsets.all(8.0),
-          child: Row( 
-            children: [  
-              //Text('Check in'),
-              Text(
-                tileString, 
-                style: TextStyle(  
-                  color: Colors.white,
-                  
-                ),
-              ),
-              //Text('Date: $date')
-            ],
+    return Card( 
+      child: ListTile(  
+        leading: CircleAvatar( 
+          foregroundColor: const Color.fromRGBO(240, 240, 240, 1),
+          backgroundColor: const Color.fromRGBO(60, 61, 55, 1),
+          child: Text(
+            formattedText[0].substring(0, 3),
+            //selectionColor: Color.fromRGBO(240, 240, 240, 1),
           ),
         ),
-      )
-    );
-    //);
-  }
-}
-
-class Inventory extends StatefulWidget {
-  const Inventory({super.key});
-
-  @override
-  State<Inventory> createState() => InventoryState();
-}
-
-class InventoryState extends State<Inventory> {
-  @override 
-  Widget build(BuildContext context) {
-    return Scaffold(  
-      appBar: AppBar(  
-        title: Text('Inventory'),
-        backgroundColor: Colors.brown,
-        toolbarHeight: 60.0,
-        titleTextStyle: const TextStyle(
-          fontSize: 32.0,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-        leading: IconButton(  
-          icon: const Icon(Icons.home),
-          color: Colors.white,
-          onPressed: () {
-            Navigator.pop(context);
-          }
-        ),
+        tileColor:const Color.fromRGBO(22, 22, 30, 1),
+        title: Text("Part ID: ${formattedText[0]}"),
+        subtitle: Text(formattedText[1]),
+        textColor: const Color.fromRGBO(240, 240, 240, 1),
+        onTap: () {}
+        
       ),
-      body: UserInventory(),
     );
   }
 }

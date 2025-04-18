@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'tabbed_inventory.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -87,6 +87,7 @@ Future<void> sendData(String data) async {
   //Map<String, String> headers = {"Content-Type": "application/json"};
   final String sendUrl = 'http://172.191.111.81:8081/api/components';
   final response = await http.post(  
+    //Uri.parse('http://ptsv3.com/t/afeafaefaef/post/'),
     Uri.parse(sendUrl),
     headers: {HttpHeaders.authorizationHeader: 'eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyTmFtZSI6IkFkbWluIiwiZXhwIjoxNzQzMTE1NTE2fQ.6hlGpXVCPyCZdaeueBm98fdFC5jbRgT6TOZJUg7XJ1Q', 'Content-Type': 'application/json'},
     body: jsonEncode({
@@ -148,7 +149,7 @@ class _InventoryPageState extends State<InventoryPage> {
           ),
           FloatingActionButton(  
             onPressed: () {
-              //Navigator.push(context, MaterialPageRoute(builder: (context) => const MyTabbedPage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const MyTabbedPage()));
             },
             child: Text('tabbed inventory'),
           ),
@@ -224,4 +225,4 @@ class _InventoryTileState extends State<InventoryTile> {
       )
     );
   }
-}
+}*/

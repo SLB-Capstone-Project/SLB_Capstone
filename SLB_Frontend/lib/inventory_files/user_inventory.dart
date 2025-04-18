@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:quiver/collection.dart';
-import 'tabbed_inventory.dart';
 import 'http_functions.dart' as http_funct;
 import 'dart:convert';
 import 'dart:io';
@@ -18,10 +17,11 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
     Tab(text: 'Products'),
     Tab(text: 'Parts'),
   ];
-
+  List<String> part_id_arr = [];
   List<String> part_arr = [];
   List<String> product_arr = [];
-  var productmap = Multimap<String, String>();
+  var productmap = Multimap<String, String>(); //maps products to part ID
+  var partmap = Multimap<int, int>(); //maps part ID to part
 
   late TabController _tabController;
 
@@ -31,21 +31,21 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
     _tabController = TabController(vsync: this, length: myTabs.length);
     http_funct.getUserProducts().then((List result) {
       //result contains a list of parts 
-      //print(result[0]);
       for(int i = 0; i < result.length; i++) {
         productmap.add("Product ID: ${result[i]['productId']} "
           "ProductName: ${result[i]['productName']}", 
           "Part ID: ${result[i]['partId']} \n"
         "partName: ${result[i]['partName']}");
+        partmap.add(int.parse(result[i]['partId']), int.parse(result[i]['partId'].toString().substring(3)));
         product_arr.add("Product ID: ${result[i]['productId']} \n"
           "ProductName: ${result[i]['productName']}");
-        part_arr.add( "Part ID: ${result[i]['partId']} \n"
+        part_arr.add("Part ID: ${result[i]['partId']} \n"
         "partName: ${result[i]['partName']}");
       }
       product_arr = product_arr.toSet().toList();
-      print(productmap.toString());
-      print(productmap["Product ID: 1 "
-          "ProductName: Laptop"]);
+      //print(productmap.toString());
+      //print(productmap["Product ID: 1 "
+      //    "ProductName: Laptop"]);
       //create new multimap to make multiple parts to a product
       setState(() {});
     });

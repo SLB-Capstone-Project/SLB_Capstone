@@ -131,10 +131,10 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
                           List<String> productList = productmap[temp].toList();
                           print(productList);
                           //print(temp);
-                          Navigator.push(
+                          /*Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => ProductList(productList: productList)),
-                          );
+                          );*/
                         }
                         //onTap: () => {remove_index(index)},
                       );

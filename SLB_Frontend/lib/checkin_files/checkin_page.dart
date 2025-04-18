@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:barcode_scan2/barcode_scan2.dart' as barcode_scan;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../globals.dart' as global;
 import 'package:flutter/services.dart';
-import '../inventory_files/http_functions.dart' as http_funct;
 import 'dart:async'; // 用于 Duration
+import '../globals.dart' as global;
+
 
 class CheckInPage extends StatefulWidget {
   const CheckInPage({super.key});
@@ -45,29 +45,25 @@ class _CheckInPageState extends State<CheckInPage> {
   }
 
   Future<void> processBarcode(String barcode) async {
-    if (barcode.length != 10 || !RegExp(r'^[0-9]+$').hasMatch(barcode)) {
+    if (!RegExp(r'^[0-9]+$').hasMatch(barcode) || barcode.length > 6) {
       setState(() {
-        scanResultMessage = 'Invalid barcode: must be 10 digits';
+        scanResultMessage = 'Invalid barcode: must be up to 6 digits';
         scanResultColor = Colors.red;
       });
       return;
     }
 
-    String categoryId = barcode.substring(0, 4);
-    String componentId = barcode.substring(4);
+    int partId = int.parse(barcode);
 
-    // Convert to integer to remove leading zeros
-    int partId = int.parse(componentId);
-
-    //('DEBUG: Scanned barcode - Category: $categoryId, PartID: $partId');
-    //print('DEBUG: Current token: $globalToken');
+    print('DEBUG: Scanned PartID: $partId');
+    print('DEBUG: Current token: ${global.token}');
 
     setState(() {
       isLoading = true;
-      scanResultMessage = 'Barcode scanned: $categoryId $componentId';
+      scanResultMessage = 'Part ID scanned: $partId';
       scanResultColor = Colors.green;
-      currentPartId = int.parse(componentId);
-      _historyRecords.add('${_historyRecords.length + 1}. $categoryId $componentId');
+      currentPartId = partId;
+      _historyRecords.add('${_historyRecords.length + 1}.   $partId'); // 添加序号和空格
       isLoading = false;
     });
   }
@@ -104,7 +100,6 @@ class _CheckInPageState extends State<CheckInPage> {
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
-        http_funct.getUserHistory();
         setState(() {
           scanResultMessage = 'Borrow successful';
           scanResultColor = Colors.green;
@@ -156,7 +151,6 @@ class _CheckInPageState extends State<CheckInPage> {
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
-        http_funct.getUserHistory();
         setState(() {
           scanResultMessage = 'Return successful';
           scanResultColor = Colors.green;
@@ -200,19 +194,11 @@ class _CheckInPageState extends State<CheckInPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const SizedBox(height: 16.0),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.camera_alt),
-                  label: const Text('Scan Barcode from Image'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.brown.shade300,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: scanBarcodeFromImage,
-                ),
+                // 已完全移除 ElevatedButton.icon (Scan Barcode from Image 按钮)
                 ElevatedButton(
                   onPressed: isLoading ? null : scanBarcode,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.brown,
+                    backgroundColor: Colors.orange,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   ),
@@ -266,9 +252,9 @@ class _CheckInPageState extends State<CheckInPage> {
                               onPartIdSubmitted: (partId) {
                                 setState(() {
                                   currentPartId = partId;
-                                  scanResultMessage = 'Part ID set: $partId';
+                                  scanResultMessage = '$partId'; // 直接显示数字
                                   scanResultColor = Colors.green;
-                                  _historyRecords.add('${_historyRecords.length + 1}. Part ID: $partId');
+                                  _historyRecords.add('${_historyRecords.length + 1}   $partId'); // 修改记录格式
                                 });
                               },
                             ),
@@ -333,7 +319,7 @@ class _ManualInputPageState extends State<ManualInputPage> {
 
     if (!RegExp(r'^[0-9]+$').hasMatch(input) || input.length > 6) {
       setState(() {
-        scanResultMessage = 'Invalid input: must be up to 6 digits';
+        scanResultMessage = 'Digit length should not be bigger than 6';
         scanResultColor = Colors.red;
       });
       return;
@@ -341,11 +327,10 @@ class _ManualInputPageState extends State<ManualInputPage> {
 
     setState(() {
       isLoading = true;
-      scanResultMessage = 'Processing...';
+      scanResultMessage = 'Dealing...';
       scanResultColor = Colors.blue;
     });
 
-    // 去零处理并转换为整数
     int partId = int.parse(input);
 
     if (widget.onPartIdSubmitted != null) {
@@ -353,7 +338,7 @@ class _ManualInputPageState extends State<ManualInputPage> {
     }
 
     setState(() {
-      scanResultMessage = 'Part ID accepted: $partId';
+      scanResultMessage = '$partId';
       scanResultColor = Colors.green;
       isLoading = false;
     });
@@ -366,7 +351,7 @@ class _ManualInputPageState extends State<ManualInputPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Manual Input Part ID'),
+        title: const Text('Manual Input'),
         backgroundColor: Colors.brown,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -391,9 +376,9 @@ class _ManualInputPageState extends State<ManualInputPage> {
                   controller: _barcodeController,
                   keyboardType: TextInputType.number,
                   maxLength: 6,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white, fontSize: 24),
                   decoration: const InputDecoration(
-                    labelText: 'Enter Part ID (up to 6 digits)',
+                    labelText: 'Input Digit (<=6)',
                     labelStyle: TextStyle(color: Colors.white),
                     border: OutlineInputBorder(),
                     enabledBorder: OutlineInputBorder(
@@ -412,14 +397,14 @@ class _ManualInputPageState extends State<ManualInputPage> {
                     foregroundColor: Colors.white,
                     minimumSize: const Size(double.infinity, 50),
                   ),
-                  child: const Text('Confirm'),
+                  child: const Text('Confirm', style: TextStyle(fontSize: 20)),
                 ),
                 const SizedBox(height: 20),
                 Text(
                   scanResultMessage,
                   style: TextStyle(
                     color: scanResultColor,
-                    fontSize: 16.0,
+                    fontSize: 24.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -441,80 +426,218 @@ class _ManualInputPageState extends State<ManualInputPage> {
   }
 }
 
-
 class HistoryPage extends StatefulWidget {
   final List<String> historyRecords;
   const HistoryPage({Key? key, required this.historyRecords}) : super(key: key);
   @override _HistoryPageState createState() => _HistoryPageState();
 }
 
+
 class _HistoryPageState extends State<HistoryPage> {
   final ScrollController _scrollController = ScrollController();
-  String _selectedText = '';
+  String _searchQuery = '';
 
-  void _clearHistory() => setState(() => widget.historyRecords.clear());
-  void _scrollToTop() => _scrollController.animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
-  void _scrollToBottom() => _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
-  void _copyAllText() {
-    Clipboard.setData(ClipboardData(text: widget.historyRecords.join('\n')));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('All content copied to clipboard')));
+  void _clearHistory() {
+    setState(() {
+      widget.historyRecords.clear();
+    });
   }
-  void _copySelectedText(String text) {
-    Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Selected content copied to clipboard')));
+
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _scrollToBottom() {
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _copyAllText() {
+    final formattedText = widget.historyRecords.join('\n');
+    Clipboard.setData(ClipboardData(text: formattedText));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('All content copied to clipboard')),
+    );
+  }
+
+  // 依照 _searchQuery 做篩選，但不會改動原本的 index
+  List<String> get filteredRecords {
+    if (_searchQuery.isEmpty) {
+      return widget.historyRecords;
+    } else {
+      return widget.historyRecords.where((record) {
+        // 你可改成只檢查 part_id 欄位
+        // 但這裡為簡易示範，先對整個 record 做搜尋
+        return record.toLowerCase().contains(_searchQuery.toLowerCase());
+      }).toList();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    // DataTable 標題/儲存格文字樣式
+    const headerStyle = TextStyle(
+      color: Colors.white,
+      fontWeight: FontWeight.bold,
+      fontSize: 16,
+    );
+    const cellStyle = TextStyle(
+      color: Colors.white,
+      fontSize: 16,
+    );
+
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Scan History'),
+        title: const Text('History'),
         backgroundColor: Colors.brown,
         titleTextStyle: const TextStyle(
           fontSize: 20.0,
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
-        actions: [IconButton(icon: const Icon(Icons.copy), tooltip: 'Copy all', onPressed: _copyAllText)],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.copy),
+            tooltip: 'Copy all',
+            onPressed: _copyAllText,
+            color: Colors.white,
+          ),
+        ],
       ),
-      backgroundColor: Colors.black,
       body: Column(
         children: [
-          IconButton(icon: const Icon(Icons.arrow_upward, color: Colors.white), onPressed: _scrollToTop),
+          // 搜尋列
+          Container(
+            color: Colors.brown.shade300,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            child: TextField(
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.search, color: Colors.white),
+                hintText: 'Search...',
+                hintStyle: TextStyle(color: Colors.white54),
+                border: InputBorder.none,
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+            ),
+          ),
+
+          // DataTable
           Expanded(
-            child: Scrollbar(
-              controller: _scrollController,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
               child: SingleChildScrollView(
                 controller: _scrollController,
                 padding: const EdgeInsets.all(16.0),
-                child: SelectableText.rich(
-                  TextSpan(children: widget.historyRecords.map((record) => TextSpan(text: '$record\n', style: const TextStyle(fontSize: 18, color: Colors.white))).toList()),
-                  style: const TextStyle(fontFamily: 'monospace'),
+                child: DataTable(
+                  headingRowColor:
+                  MaterialStateProperty.all(Colors.brown.shade300),
+                  columns: const [
+                    DataColumn(
+                      label: Center(
+                        child: Text('Index', style: headerStyle),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Center(
+                        child: Text('part_id', style: headerStyle),
+                      ),
+                    ),
+                  ],
+                  rows: filteredRecords.map((record) {
+                    // 假設 record = "2   109"
+                    // 以空白分割 => parts[0] = "2", parts[1] = "109"
+                    final parts = record.split(RegExp(r'\s+'));
+                    final indexStr = parts.isNotEmpty ? parts[0] : '';
+                    final partIdStr = parts.length >= 2 ? parts[1] : '';
+
+                    return DataRow(
+                      cells: [
+                        // Index 欄位: 置中顯示, 不可複製
+                        DataCell(
+                          Center(child: Text(indexStr, style: cellStyle)),
+                        ),
+                        // part_id 欄位: 置中顯示, 點擊可複製
+                        DataCell(
+                          Center(
+                            child: GestureDetector(
+                              onTap: () {
+                                if (partIdStr.isNotEmpty) {
+                                  Clipboard.setData(ClipboardData(text: partIdStr));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Copied part_id: $partIdStr'),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: Text(partIdStr, style: cellStyle),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
                 ),
               ),
             ),
           ),
-          IconButton(icon: const Icon(Icons.arrow_downward, color: Colors.white), onPressed: _scrollToBottom),
-          if (_selectedText.isNotEmpty)
-            ElevatedButton(
-              onPressed: () => _copySelectedText(_selectedText),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.brown, foregroundColor: Colors.white),
-              child: const Text('Copy Selected'),
-            ),
+
+          // 上/下箭頭
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.brown, foregroundColor: Colors.white, minimumSize: const Size(120, 48)),
-                child: const Text('Return'),
+              IconButton(
+                icon: const Icon(Icons.arrow_upward),
+                color: Colors.white,
+                onPressed: _scrollToTop,
               ),
-              ElevatedButton(
-                onPressed: _clearHistory,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.brown, foregroundColor: Colors.white, minimumSize: const Size(120, 48)),
-                child: const Text('Clear'),
+              IconButton(
+                icon: const Icon(Icons.arrow_downward),
+                color: Colors.white,
+                onPressed: _scrollToBottom,
               ),
             ],
+          ),
+
+          // Return/Clear
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.brown,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(120, 48),
+                  ),
+                  child: const Text('Return'),
+                ),
+                ElevatedButton(
+                  onPressed: _clearHistory,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(120, 48),
+                  ),
+                  child: const Text('Clear'),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16.0),
         ],

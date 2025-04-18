@@ -115,10 +115,10 @@ class HomePageState extends State<HomePage> {
               title: Text('Data', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(
+                /*Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => DataAnalysis()),
-                );
+                );*/
               },
             ),
             ListTile(

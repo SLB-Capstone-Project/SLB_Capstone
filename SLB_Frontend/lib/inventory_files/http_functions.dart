@@ -37,7 +37,7 @@ Future<List> getUserProducts() async {
   print("getting user products");
   //final uri = Uri.http('172.191.111.81:8081', '/api/categories', {'name': 'Bob Lin'});
   //print(uri);
-  final String sendUrl = 'http://172.191.111.81:8081/api/components/borrowed';
+  final String sendUrl = 'http://172.191.111.81:8081/api/components';
   final response = await http.get(  
     Uri.parse(sendUrl),
     //uri,
@@ -46,6 +46,7 @@ Future<List> getUserProducts() async {
       'Content-Type': 'application/json',
     }
   );
+  print(response.statusCode);
   if(response.statusCode == 200) {
     print(response.body);
     final responseBody = jsonDecode(response.body);

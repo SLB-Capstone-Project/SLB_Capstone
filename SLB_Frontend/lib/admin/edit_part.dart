@@ -20,27 +20,37 @@ class EditPartPage extends StatefulWidget {
 
 class _EditPartPageState extends State<EditPartPage> {
   final _formKey = GlobalKey<FormState>();
-
-  late TextEditingController idController;
-  late TextEditingController nameController;
-  late TextEditingController categoryController;
-  late String selectedType;
+  late TextEditingController _idController;
+  late TextEditingController _nameController;
+  late TextEditingController _categoryController;
+  late String _selectedType;
 
   @override
   void initState() {
     super.initState();
-    idController = TextEditingController(text: widget.id);
-    nameController = TextEditingController(text: widget.name);
-    categoryController = TextEditingController(text: widget.category);
-    selectedType = widget.type;
+    _idController = TextEditingController(text: widget.id);
+    _nameController = TextEditingController(text: widget.name);
+    _categoryController = TextEditingController(text: widget.category);
+    _selectedType = widget.type;
   }
 
   @override
   void dispose() {
-    idController.dispose();
-    nameController.dispose();
-    categoryController.dispose();
+    _idController.dispose();
+    _nameController.dispose();
+    _categoryController.dispose();
     super.dispose();
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      Navigator.pop(context, {
+        'id': _idController.text,
+        'name': _nameController.text,
+        'category': _categoryController.text,
+        'type': _selectedType,
+      });
+    }
   }
 
   @override
@@ -61,48 +71,29 @@ class _EditPartPageState extends State<EditPartPage> {
           key: _formKey,
           child: Column(
             children: [
-              buildTextField(controller: idController, label: 'Part ID'),
+              _buildTextField(_idController, 'Part ID'),
               const SizedBox(height: 16),
-              buildTextField(controller: nameController, label: 'Part Name'),
+              _buildTextField(_nameController, 'Part Name'),
               const SizedBox(height: 16),
-              buildTextField(controller: categoryController, label: 'Category'),
+              _buildTextField(_categoryController, 'Category'),
               const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: selectedType,
-                dropdownColor: Colors.grey[900],
-                decoration: InputDecoration(
-                  labelText: 'Type',
-                  labelStyle: const TextStyle(color: Colors.white),
-                  filled: true,
-                  fillColor: Colors.grey[900],
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                style: const TextStyle(color: Colors.white),
-                items: ['Product', 'Part'].map((type) {
-                  return DropdownMenuItem(value: type, child: Text(type));
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) setState(() => selectedType = value);
-                },
-              ),
+              _buildTypeDropdown(),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    print('Updated ID: ${idController.text}');
-                    print('Updated Name: ${nameController.text}');
-                    print('Updated Category: ${categoryController.text}');
-                    print('Updated Type: $selectedType');
-                    Navigator.pop(context);
-                  }
-                },
+                onPressed: _submitForm,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF7B544C),
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                child: const Text('Save Changes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              )
+                child: const Text('Save Changes',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16)),
+              ),
             ],
           ),
         ),
@@ -110,17 +101,50 @@ class _EditPartPageState extends State<EditPartPage> {
     );
   }
 
-  Widget buildTextField({required TextEditingController controller, required String label}) {
+  Widget _buildTextField(TextEditingController controller, String label) {
     return TextFormField(
       controller: controller,
       style: const TextStyle(color: Colors.white),
-      validator: (value) => value == null || value.isEmpty ? 'Please enter $label' : null,
+      validator: (value) => value!.isEmpty ? 'Please enter $label' : null,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.white),
+        labelStyle: const TextStyle(color: Colors.grey),
         filled: true,
         fillColor: Colors.grey[900],
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF7B544C), width: 1),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTypeDropdown() {
+    return DropdownButtonFormField<String>(
+      value: _selectedType,
+      items: ['Product', 'Part'].map((type) => DropdownMenuItem(
+        value: type,
+        child: Text(type, style: const TextStyle(color: Colors.white)),
+      )).toList(),
+      onChanged: (String? value) {
+        if (value != null) {
+          setState(() => _selectedType = value);
+        }
+      },
+      dropdownColor: Colors.grey[900],
+      decoration: InputDecoration(
+        labelText: 'Type',
+        labelStyle: const TextStyle(color: Colors.grey),
+        filled: true,
+        fillColor: Colors.grey[900],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
       ),
     );
   }

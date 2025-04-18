@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'add_parts.dart';
 import 'edit_part.dart';
@@ -42,7 +43,7 @@ class _PartManagementPageState extends State<PartManagementPage> {
   void _addRangeOfProducts() {
     showDialog(
       context: context,
-      builder: (context) => AddRangeDialog(
+      builder: (context) => _AddRangeDialog(
         onAdd: (startId, endId, name, category, type) {
           final startNum = int.parse(startId.replaceAll('P', ''));
           final endNum = int.parse(endId.replaceAll('P', ''));
@@ -99,8 +100,8 @@ class _PartManagementPageState extends State<PartManagementPage> {
               child: pw.BarcodeWidget(
                 barcode: pw.Barcode.qrCode(),
                 data: part['id']!,
-                width: 20,
-                height: 20,
+                width: 30,
+                height: 30,
               ),
             )).toList(),
           );
@@ -108,10 +109,9 @@ class _PartManagementPageState extends State<PartManagementPage> {
       ),
     );
 
-
     await Printing.sharePdf(
       bytes: await pdf.save(),
-      filename: 'parts-qrcodes.pdf',
+      filename: 'parts-qrcodes-${DateTime.now().millisecondsSinceEpoch}.pdf',
     );
   }
 
@@ -127,12 +127,13 @@ class _PartManagementPageState extends State<PartManagementPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Product / Part Management', style: TextStyle(color: Colors.white)),
+        title: const Text('Product / Part Management',
+            style: TextStyle(color: Colors.white, fontSize: 18)),
         backgroundColor: Colors.black,
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.history),
+            icon: const Icon(Icons.history, color: Colors.white),
             onPressed: _showHistory,
           ),
         ],
@@ -147,25 +148,18 @@ class _PartManagementPageState extends State<PartManagementPage> {
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Search...',
+                hintStyle: const TextStyle(color: Colors.grey),
                 prefixIcon: const Icon(Icons.search, color: Colors.white),
                 filled: true,
                 fillColor: Colors.grey[900],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
                 ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),
             ),
             const SizedBox(height: 20),
-
-            const Row(
-              children: [
-                Expanded(child: Text('ID', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                Expanded(child: Text('Name', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                Expanded(child: Text('Type', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                SizedBox(width: 40),
-              ],
-            ),
-            const Divider(color: Colors.grey),
 
             Expanded(
               child: ListView.builder(
@@ -177,11 +171,15 @@ class _PartManagementPageState extends State<PartManagementPage> {
                     children: [
                       Row(
                         children: [
-                          Expanded(child: Text(part['id']!, style: const TextStyle(color: Colors.white))),
-                          Expanded(child: Text(part['name']!, style: const TextStyle(color: Colors.white))),
-                          Expanded(child: Text(part['type']!, style: const TextStyle(color: Colors.white))),
+                          Expanded(child: Text(part['id']!,
+                              style: const TextStyle(color: Colors.white))),
+                          Expanded(child: Text(part['name']!,
+                              style: const TextStyle(color: Colors.white))),
+                          Expanded(child: Text(part['type']!,
+                              style: const TextStyle(color: Colors.white))),
                           IconButton(
-                            icon: Icon(isExpanded ? Icons.expand_less : Icons.more_vert, color: Colors.white70),
+                            icon: Icon(isExpanded ? Icons.expand_less : Icons.more_vert,
+                                color: Colors.white70),
                             onPressed: () => setState(() {
                               isExpanded ? expandedRows.remove(index) : expandedRows.add(index);
                             }),
@@ -235,8 +233,6 @@ class _PartManagementPageState extends State<PartManagementPage> {
               ),
             ),
 
-            const SizedBox(height: 20),
-
             Row(
               children: [
                 Expanded(
@@ -265,7 +261,8 @@ class _PartManagementPageState extends State<PartManagementPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Add Product', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    child: const Text('Add Product',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -279,7 +276,8 @@ class _PartManagementPageState extends State<PartManagementPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Add Range', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    child: const Text('Add Range',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],
@@ -324,16 +322,16 @@ class _PartManagementPageState extends State<PartManagementPage> {
   }
 }
 
-class AddRangeDialog extends StatefulWidget {
+class _AddRangeDialog extends StatefulWidget {
   final Function(String, String, String, String, String) onAdd;
 
-  const AddRangeDialog({super.key, required this.onAdd});
+  const _AddRangeDialog({required this.onAdd});
 
   @override
-  State<AddRangeDialog> createState() => _AddRangeDialogState();
+  State<_AddRangeDialog> createState() => __AddRangeDialogState();
 }
 
-class _AddRangeDialogState extends State<AddRangeDialog> {
+class __AddRangeDialogState extends State<_AddRangeDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _startIdController = TextEditingController(text: 'P001');
   final TextEditingController _endIdController = TextEditingController(text: 'P010');
@@ -343,72 +341,124 @@ class _AddRangeDialogState extends State<AddRangeDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Add Range of Products'),
-      content: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
+    return Dialog(
+      backgroundColor: Colors.grey[900],
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextFormField(
-                controller: _startIdController,
-                decoration: const InputDecoration(labelText: 'Start ID (e.g. P001)'),
-                validator: (value) => value!.isEmpty ? 'Enter Start ID' : null,
-              ),
-              TextFormField(
-                controller: _endIdController,
-                decoration: const InputDecoration(labelText: 'End ID (e.g. P010)'),
-                validator: (value) => value!.isEmpty ? 'Enter End ID' : null,
-              ),
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Part Name'),
-                validator: (value) => value!.isEmpty ? 'Enter Name' : null,
-              ),
-              TextFormField(
-                controller: _categoryController,
-                decoration: const InputDecoration(labelText: 'Category'),
-                validator: (value) => value!.isEmpty ? 'Enter Category' : null,
-              ),
-              DropdownButtonFormField<String>(
-                value: _selectedType,
-                items: ['Product', 'Part'].map((type) => DropdownMenuItem<String>(
-                  value: type,
-                  child: Text(type),
-                )).toList(),
-                onChanged: (String? value) {
-                  setState(() {
-                    _selectedType = value!;
-                  });
-                },
-                decoration: const InputDecoration(labelText: 'Type'),
+              Text('Add Range of Products',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold)),
+
+              const SizedBox(height: 20),
+
+              _buildTextField(_startIdController, 'Start ID (e.g. P001)'),
+              const SizedBox(height: 12),
+              _buildTextField(_endIdController, 'End ID (e.g. P010)'),
+              const SizedBox(height: 12),
+              _buildTextField(_nameController, 'Part Name'),
+              const SizedBox(height: 12),
+              _buildTextField(_categoryController, 'Category'),
+              const SizedBox(height: 12),
+              _buildTypeDropdown(),
+              const SizedBox(height: 20),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    child: const Text('Cancel',
+                        style: TextStyle(color: Colors.white70)),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF7B544C)),
+                    child: const Text('Confirm'),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        widget.onAdd(
+                          _startIdController.text,
+                          _endIdController.text,
+                          _nameController.text,
+                          _categoryController.text,
+                          _selectedType,
+                        );
+                        Navigator.pop(context);
+                      }
+                    },
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              widget.onAdd(
-                _startIdController.text,
-                _endIdController.text,
-                _nameController.text,
-                _categoryController.text,
-                _selectedType,
-              );
-              Navigator.pop(context);
-            }
-          },
-          child: const Text('Add'),
-        ),
-      ],
     );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label) {
+    return TextFormField(
+      controller: controller,
+      style: const TextStyle(color: Colors.white),
+      validator: (value) => value!.isEmpty ? 'Please enter $label' : null,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.grey),
+        filled: true,
+        fillColor: Colors.grey[800],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Color(0xFF7B544C), width: 1),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTypeDropdown() {
+    return DropdownButtonFormField<String>(
+      value: _selectedType,
+      items: ['Product', 'Part'].map((type) => DropdownMenuItem<String>(
+        value: type,
+        child: Text(type, style: const TextStyle(color: Colors.white)),
+      )).toList(),
+      onChanged: (String? value) {
+        setState(() => _selectedType = value!);
+      },
+      dropdownColor: Colors.grey[800],
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: 'Type',
+        labelStyle: const TextStyle(color: Colors.grey),
+        filled: true,
+        fillColor: Colors.grey[800],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _startIdController.dispose();
+    _endIdController.dispose();
+    _nameController.dispose();
+    _categoryController.dispose();
+    super.dispose();
   }
 }

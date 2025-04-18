@@ -288,8 +288,8 @@ class _PartManagementPageState extends State<PartManagementPage> {
     );
   }
 
-  void _editPart(Map<String, String> part, int index) {
-    Navigator.push(
+  void _editPart(Map<String, String> part, int index) async {
+    final editedPart = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => EditPartPage(
@@ -299,15 +299,18 @@ class _PartManagementPageState extends State<PartManagementPage> {
           type: part['type']!,
         ),
       ),
-    ).then((_) {
+    );
+
+    if (editedPart != null) {
       setState(() {
+        parts[index] = editedPart;
         _operationHistory.add({
           'action': 'Edited part',
           'details': 'Edited ${part['id']}',
           'timestamp': DateTime.now().toString(),
         });
       });
-    });
+    }
   }
 
   void _deletePart(int index) {

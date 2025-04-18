@@ -87,7 +87,6 @@ Future<void> sendData(String data) async {
   //Map<String, String> headers = {"Content-Type": "application/json"};
   final String sendUrl = 'http://172.191.111.81:8081/api/components';
   final response = await http.post(  
-    //Uri.parse('http://ptsv3.com/t/afeafaefaef/post/'),
     Uri.parse(sendUrl),
     headers: {HttpHeaders.authorizationHeader: 'eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyTmFtZSI6IkFkbWluIiwiZXhwIjoxNzQzMTE1NTE2fQ.6hlGpXVCPyCZdaeueBm98fdFC5jbRgT6TOZJUg7XJ1Q', 'Content-Type': 'application/json'},
     body: jsonEncode({

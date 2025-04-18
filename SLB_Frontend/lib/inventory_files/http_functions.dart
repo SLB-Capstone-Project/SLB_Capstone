@@ -8,7 +8,7 @@ import '../globals.dart' as global;
 
 Future<List<String>> getUserParts() async {
   List<String> string_arr = [];
-  final String sendUrl = 'http://172.191.111.81:8081/api/components';
+  final String sendUrl = 'http://172.191.111.81:8081/api/components/borrowed';
   String token = global.token;
   final response = await http.get(  
     Uri.parse(sendUrl),
@@ -37,7 +37,7 @@ Future<List> getUserProducts() async {
   print("getting user products");
   //final uri = Uri.http('172.191.111.81:8081', '/api/categories', {'name': 'Bob Lin'});
   //print(uri);
-  final String sendUrl = 'http://172.191.111.81:8081/api/components';
+  final String sendUrl = 'http://172.191.111.81:8081/api/components/borrowed';
   final response = await http.get(  
     Uri.parse(sendUrl),
     //uri,

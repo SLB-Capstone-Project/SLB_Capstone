@@ -45,12 +45,10 @@ Future<List> getUserProducts() async {
       'Content-Type': 'application/json',
     }
   );
-  print(response.statusCode);
   if(response.statusCode == 200) {
-    print(response.body);
     final responseBody = jsonDecode(response.body);
     items = responseBody['data'];
-    print(items);
+    //print(items);
   }
   else {
     print(response.statusCode);

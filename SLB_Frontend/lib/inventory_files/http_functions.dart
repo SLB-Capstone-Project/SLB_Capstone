@@ -31,11 +31,8 @@ Future<List<String>> getUserParts() async {
 }
 
 Future<List> getUserProducts() async {
-  //List<String> string_arr = [];
   List items = [];
   print("getting user products");
-  //final uri = Uri.http('172.191.111.81:8081', '/api/categories', {'name': 'Bob Lin'});
-  //print(uri);
   final String sendUrl = 'http://172.191.111.81:8081/api/components/borrowed';
   final response = await http.get(  
     Uri.parse(sendUrl),

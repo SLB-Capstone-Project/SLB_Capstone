@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:quiver/collection.dart';
-import 'http_functions.dart' as http_funct;
-import 'dart:convert';
-import 'dart:io';
+import 'package:provider/provider.dart';
+import 'provider.dart';
+//mport 'http_functions.dart' as http_funct;
 import 'associativity.dart';
 //import '../globals.dart' as global;
 
@@ -17,77 +16,15 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
     Tab(text: 'Products'),
     Tab(text: 'Parts'),
   ];
-  List<String> part_id_arr = [];
+
   List<String> part_arr = [];
-  List<int?> product_arr = [];
-
-  List<Map<String, dynamic>> products = [];
-  List<Map<String, dynamic>> parts = [];
-  var productmap = Multimap<String, String>(); //maps products to part ID
-  var partmap = Multimap<int, int>(); //maps part ID to part
-
-  //var part_to_id = Multimap<List<int>, int>(); //maps products and parts to partId's
-
-  var product_to_part = Map<int?, List<int>>(); //map product to parts
-  var part_to_id = Map<List<int?>, List<int>>(); //map product and part to partId
+ 
   late TabController _tabController;
-
-  //note: products correspond to multiple parts(part numbers)
-  //note: parts correspond to multiple part ids
   
-  //a bunch of getter functions
-  int? get_product(int index) {
-    return product_arr[index];
-  }
-
-  List<int>? get_parts_from_product(int? key) {
-    return product_to_part[key];
-  }
-  /*int get_part(int index) {
-    return part_arr[index];
-  }*/
   @override
   void initState() {
     super.initState();
     _tabController = TabController(vsync: this, length: myTabs.length);
-    http_funct.getUserProducts().then((List result) {
-      //result contains a list of parts 
-      for(int i = 0; i < result.length; i++) {
-        int? productId = result[i]['productId'];
-        int part = result[i]['partNumber'];
-        int partId = result[i]['partId'];
-        product_to_part.update(productId, (value) => value + [part], ifAbsent: () => [part]);
-        part_to_id.update([productId, part], (value) => value + [partId], ifAbsent: () => [partId]);
-        /*product_to_part.add(result[i]['productId'], result[i]['partNumber']);
-        part_to_id.add([result[i]['productId'], result[i]['partNumber']], result[i]['partId']);
-        products.add({
-          'productId': result[i]['productId']
-        });
-        parts.add({
-          'partId': result[i]['part']
-        });
-        productmap.add("Product ID: ${result[i]['productId']} "
-          "ProductName: ${result[i]['productName']}", 
-          "Part ID: ${result[i]['partId']} \n"
-        "partName: ${result[i]['partName']}");
-        //partmap.add(int.parse(result[i]['partId']), int.parse(result[i]['partId'].toString().substring(3)));
-        product_arr.add("Product ID: ${result[i]['productId']} \n"
-          "ProductName: ${result[i]['productName']}");
-        part_arr.add("Part ID: ${result[i]['partId']} \n"
-        "partName: ${result[i]['partName']}");*/ 
-      }
-      product_arr = product_to_part.keys.toList();
-      //print(part_to_id);
-      //print(part_to_id.keys);
-      //print(product_arr);
-      //print(product_arr.length);
-  
-      //print(productmap.toString());
-      //print(productmap["Product ID: 1 "
-      //    "ProductName: Laptop"]);
-      //create new multimap to make multiple parts to a product
-      setState(() {});
-    });
   }
 
   @override
@@ -129,43 +66,7 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
             color: const Color.fromRGBO(10, 10, 10, 1),
             child: Column (
               children: [
-                InventoryWindow(inventoryList: product_arr, funct: get_product, funct2: get_parts_from_product),
-                //TextField(  
-
-                //),           
-                /*Expanded(
-                  child: SizedBox(
-                    height: 200,
-                    child: ListView.separated(
-                      padding: const EdgeInsets.all(8),
-                      itemCount: product_arr.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return ListTile(
-                          leading: Text(product_arr[index]),
-                          //trailing: PopupMenuExample(),
-                          /*Pop(
-                            icon: const Icon(Icons.more_vert),
-                            onPressed: () {
-                              PopupMenuExample();
-                            }*/
-                          
-                          onTap: () {
-                            String temp = product_arr[index].replaceAll("\n", "");
-                            List<String> productList = productmap[temp].toList();
-                            print(productList);
-                            //print(temp);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => ProductList(productList: productList)),
-                            );
-                          }
-                          //onTap: () => {remove_index(index)},
-                        );
-                      },
-                      separatorBuilder: (BuildContext context, int index) => const Divider(),
-                    ),
-                  ),
-                ),*/
+                InventoryWindow(),
               ]
             ),
           ),
@@ -250,16 +151,7 @@ class _InventoryTileState extends State<InventoryTile> {
 
 
 class InventoryWindow extends StatelessWidget {
-  Function funct;
-  Function funct2;
-  final List<int?> inventoryList;
-
-  InventoryWindow({super.key, required this.inventoryList, required this.funct, required this.funct2});
-
-  void check_inventoryList() {
-    print(inventoryList);
-    print(inventoryList.length);
-  }
+  const InventoryWindow({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -268,7 +160,7 @@ class InventoryWindow extends StatelessWidget {
           slivers: <Widget>[
             SliverList(
               delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                  //return InventoryCard(tileString: inventoryList[index]);
+                  int productId = Provider.of<UserProducts>(context, listen: false).getProduct(index); 
                   return Card( 
                     child: ListTile(  
                       /*leading: CircleAvatar( 
@@ -279,32 +171,22 @@ class InventoryWindow extends StatelessWidget {
                           //selectionColor: Color.fromRGBO(240, 240, 240, 1),
                         ),
                       ),*/
+                    
                       tileColor:const Color.fromRGBO(22, 22, 30, 1),
-                      title: Text("Product ID: ${funct(index)}"),
+                      title: Text("Product ID: $productId"),
                       //subtitle: Text(formattedText[1]),
                       textColor: const Color.fromRGBO(240, 240, 240, 1),
                       onTap: () {
-                        /*widget.hidden = !widget.hidden;
-                        print(widget.hidden);
-                        /*if(widget.hidden == false) {
-                          return buildContainer();
-                        }*/
-                        setState() {}; */
-                        //String temp = product_arr[index].replaceAll("\n", "");
-                        int? product = funct(index);
-                        List<int> parts = funct2(product);
-                        //print(parts);
-                        //print(temp);
+                        List<int> partList = Provider.of<UserProducts>(context, listen: false).getPartList(productId) ?? [];
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => ProductList(product: product, partList: parts)),
+                          MaterialPageRoute(builder: (context) => SPartList(product: productId, partList: partList)),
                         );
                       }
-                      
                     ),
                   );
                 }, 
-                childCount: inventoryList.length,
+                childCount: Provider.of<UserProducts>(context, listen: false).getProductLength,
               ),
               
             ),

@@ -42,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final String apiUrl = "http://172.191.111.81:8081/login";
+    final String apiUrl = "http://40.76.142.12:8081/login";
 
     try {
       final hashedPassword = _hashPassword(
@@ -59,6 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       final responseBody = jsonDecode(response.body);
+      print(responseBody);
       if (response.statusCode == 200 && responseBody["code"] == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Login Successful! Redirecting to HomePage.")),

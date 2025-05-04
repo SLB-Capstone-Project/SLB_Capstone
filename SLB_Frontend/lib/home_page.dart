@@ -141,56 +141,8 @@ class HomePageState extends State<HomePage> {
         ),
       ),
       body: Column(
-        children: [ HomePageList()
-        /*child: Column(  
-          //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [  
-            //Column(
-             // children: [
-            //SizedBox(height:30),
-            Container( 
-              //margin: EdgeInsets.symmetric(horizontal: 25),
-              alignment: Alignment.centerLeft,
-              color: const Color.fromRGBO(10, 10, 10, 1),
-              padding: EdgeInsets.all(20),
-              child: Text(
-                'Recent Activity',
-                style: TextStyle(  
-                  color: const Color.fromRGBO(240, 240, 240, 1),
-                  fontSize: 20,
-                ),
-              ),
-            ),
-            //SizedBox(height:15),
-            HistoryWindow(historyList: global.historyList),
-            //SizedBox(height:50),
-            Container( 
-              //margin: EdgeInsets.symmetric(horizontal: 25),
-              alignment: Alignment.centerLeft,
-              color: Colors.black,
-              padding: EdgeInsets.all(20),
-              child: Text(
-                'Notications',
-                style: TextStyle(  
-                  color: Colors.white,
-                  fontSize: 20,
-                ),
-              ),
-            ),
-            Container( 
-              //margin: EdgeInsets.symmetric(horizontal: 25),
-              alignment: Alignment.centerLeft,
-              color: Colors.black,
-              //padding: EdgeInsets.all(20),
-              child: Text(
-                'None for now',
-                style: TextStyle(  
-                  color: Colors.white,
-                  fontSize: 18,
-                ),
-              ),
-            ),*/
-
+        children: [ 
+          HomePageList(),
           ]
         ),
     );
@@ -222,6 +174,7 @@ class HomePageList extends StatelessWidget {
     {'title': 'notification 1'},
     {'title': 'notification 2'},
   ];
+  
   HomePageList({super.key});
 
   /*void check_inventoryList() {
@@ -337,94 +290,6 @@ class HomePageList extends StatelessWidget {
   }
 }
 
-class tileCard extends StatefulWidget {
-  int index;
-  List<Map<String, String>> homePageList;
-  List<Map<String, String>> list;
-  tileCard({super.key, required this.homePageList, required this.index, required this.list});
-
-  @override 
-  State<tileCard> createState() => tileCardState();
-}
-
-class tileCardState extends State<tileCard> {
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: const Color.fromRGBO(22, 22, 30, 1),
-      child: Column( 
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-              style: TextStyle(fontSize: 18, color: const Color.fromRGBO(240, 240, 240, 1)),
-              widget.homePageList[widget.index]['title'] ?? ""
-              ),
-            )
-          ),
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16.0),
-              child: SizedBox(
-                height: min(56*widget.list.length.toDouble() + 8, 56*3+8),
-                child: ListView.builder(
-                  //padding: const EdgeInsets.all(8.0),
-                  itemCount: widget.list.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Card(
-                      color:const Color.fromRGBO(30, 30, 38, 1),
-                      child: ListTile(  
-                        //tileColor: const Color.fromRGBO(30, 30, 38, 1),
-                        leading: Text(style: TextStyle(color: const Color.fromRGBO(240, 240, 240, 1)),
-                          widget.list[widget.index]['title'] ?? "")
-                      )
-                    );
-                  },
-                ),
-              )
-            )
-          )
-          /*ListTile(  
-          /*leading: CircleAvatar( 
-            foregroundColor: const Color.fromRGBO(240, 240, 240, 1),
-            backgroundColor: const Color.fromRGBO(60, 61, 55, 1),
-            child: Text(
-              formattedText[0].substring(0, 3),
-              //selectionColor: Color.fromRGBO(240, 240, 240, 1),
-            ),
-          ),*/
-          tileColor:const Color.fromRGBO(22, 22, 30, 1),
-          //title: Text(homePageList[index]['title'] ?? ""),
-          //subtitle: Text(formattedText[1]),
-          textColor: const Color.fromRGBO(240, 240, 240, 1),
-          /*onTap: () {
-            /*widget.hidden = !widget.hidden;
-            print(widget.hidden);
-            /*if(widget.hidden == false) {
-              return buildContainer();
-            }*/
-            setState() {}; */
-            //String temp = product_arr[index].replaceAll("\n", "");
-            int? product = funct(index);
-            List<int> parts = funct2(product);
-            //print(parts);
-            //print(temp);
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ProductList(product: product, partList: parts)),
-            );
-          }*/
-          
-          ),*/
-        ]
-      )
-    );
-  }
-}
-
 class inventoryTile extends StatefulWidget {
   inventoryTile({super.key});
 
@@ -452,7 +317,7 @@ class inventoryTileState extends State<inventoryTile> {
                 Spacer(), 
                 RichText(
                   text: TextSpan( 
-                    text: "See All",
+                    text: "View All",
                     style: TextStyle(
                       fontSize: 12, 
                       color: const Color.fromRGBO(240, 240, 240, 1)
@@ -468,9 +333,9 @@ class inventoryTileState extends State<inventoryTile> {
                 )
             ]
           )),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Row(  
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Row(  
               children: [
                 Expanded(  
                   child: Container(  
@@ -522,95 +387,9 @@ class inventoryTileState extends State<inventoryTile> {
                 )
               ]
             )
-            )
-          
+          )
         ]
     )
     );
-    return Card(
-      color: const Color.fromRGBO(22, 22, 30, 1),
-      child: Column( 
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-              style: TextStyle(fontSize: 18, color: const Color.fromRGBO(240, 240, 240, 1)),
-              "Inventory",
-              ),
-            )
-          ),
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Row(  
-              children: [
-                Expanded(  
-                  child: Container(  
-                    height: 200,
-                    color: const Color.fromRGBO(30, 30, 38, 1),
-                  )
-                ),
-                VerticalDivider(  width: 8.0, ),
-                Expanded(  
-                  child: Column (  
-                    children: [
-                      Container(  
-                        height:100,
-                        //color:const Color.fromRGBO(30, 30, 38, 1),
-                        child: Card (  
-                          color:const Color.fromRGBO(30, 30, 38, 1),
-                        )
-                      ),
-                      Divider( height: 8.0, color: const Color.fromRGBO(22, 22, 30, 1),),
-                      Container(  
-                        height:100,
-                        color:const Color.fromRGBO(30, 30, 38, 1),
-                      ),
-                    ]
-                  )
-                )
-              ]
-            )
-          )
-        ]
-      )
-    );
   }
 }
-/*
-class HistoryWindow extends StatelessWidget {
-  final List<String> historyList;
-
-  const HistoryWindow({super.key, required this.historyList});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(5.0),
-      child: Container( 
-        //color: const Color.fromRGBO(60, 61, 55, 1),
-        height:300,
-        width:350,
-        /*decoration: BoxDecoration(  
-          color: Colors.brown,
-          borderRadius: BorderRadius.circular(40),
-          border: Border.all(
-            width: 20,
-          ),
-        ),*/   
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                  return HistoryCard(tileString: historyList[index]);
-                }, 
-                childCount: historyList.length,
-              ),
-            ),
-          ],
-        )
-      ),
-    );
-  }
-}*/

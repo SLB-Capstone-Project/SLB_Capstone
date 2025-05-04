@@ -42,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final String apiUrl = "http://40.76.142.12:8081/login";
+    final String apiUrl = "http://4.227.176.4:8081/login";
 
     try {
       final hashedPassword = _hashPassword(

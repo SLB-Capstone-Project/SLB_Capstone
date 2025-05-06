@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'inventory_files/provider.dart' as inventory_provider;
 //import 'camera_page.dart';
 
-
 void main() {
   runApp(const MyApp());
 }

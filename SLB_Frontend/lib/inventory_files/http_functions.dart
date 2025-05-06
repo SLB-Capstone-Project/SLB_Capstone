@@ -8,7 +8,7 @@ import '../globals.dart' as global;
 
 Future<List<String>> getUserParts() async {
   List<String> string_arr = [];
-  final String sendUrl = 'http://172.191.111.81:8081/api/components';
+  final String sendUrl = 'http://4.227.176.4:8081/api/components';
   String token = global.token;
   print(token);
   final response = await http.get(  
@@ -38,7 +38,7 @@ Future<List> getUserProducts() async {
   print("getting user products");
   //final uri = Uri.http('172.191.111.81:8081', '/api/categories', {'name': 'Bob Lin'});
   //print(uri);
-  final String sendUrl = 'http://172.191.111.81:8081/api/components/borrowed';
+  final String sendUrl = 'http://4.227.176.4:8081/api/components/borrowed';
   print(global.token);
   final response = await http.get(  
     Uri.parse(sendUrl),
@@ -84,7 +84,7 @@ Future<List> getUserProducts() async {
 
 Future<void> borrowProduct() async {
   print("borrowing product");
-  final String uri = 'http://172.191.111.81:8081/api/activities/borrow';
+  final String uri = 'http://4.227.176.4:8081//activities/borrow';
   print(global.token);
   final response = await http.post(  
     Uri.parse(uri),
@@ -134,7 +134,7 @@ Future<void> borrowProduct() async {
 }*/
 Future<void> deleteProduct(int id) async {
   List<String> string_arr = [];
-  final uri = Uri.http('172.191.111.81:8081', '/api/categories', {'id': 1});
+  final uri = Uri.http('4.227.176.4:8081', '/api/categories', {'id': 1});
   //final uri = Uri.http('172.191.111.81:8081', '/api/categories');
   //final String sendUrl = 'http://172.191.111.81:8081/api/categories/$id';
   String token = global.token;

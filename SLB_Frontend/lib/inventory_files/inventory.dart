@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'tabbed_inventory.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -140,7 +140,7 @@ class _InventoryPageState extends State<InventoryPage> {
           ),
           FloatingActionButton(
             onPressed: () {
-              //Navigator.push(context, MaterialPageRoute(builder: (context) => const MyTabbedPage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const MyTabbedPage()));
             },
             child: Text('tabbed inventory'),
           ),
@@ -218,4 +218,5 @@ class _InventoryTileState extends State<InventoryTile> {
       ),
     );
   }
-}
+
+}*/

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'add_employee.dart';
-import 'employee_detail.dart';
 import '../globals.dart' as globals;
+import 'edit_employee.dart';
+
+
 
 class EmployeePage extends StatefulWidget {
   const EmployeePage({super.key});
@@ -18,6 +20,7 @@ class _EmployeePageState extends State<EmployeePage> {
   bool isLoading = true;
   String errorMessage = '';
   String searchQuery = '';
+  Set<int> expandedRows = {};
 
   @override
   void initState() {
@@ -26,60 +29,100 @@ class _EmployeePageState extends State<EmployeePage> {
   }
 
   Future<void> _fetchEmployees() async {
-    if (globals.token == "") {
-      setState(() {
-        errorMessage = "No token found";
-      });
-      return;
-    }
 
+  if (globals.token == "") {
     setState(() {
-      isLoading = true;
-      errorMessage = '';
+      errorMessage = "No token found";
     });
+    return;
+  }
 
-    try {
-      const apiUrl = 'http://4.227.176.4:8081/api/employee/';
-      final response = await http.get(
-        Uri.parse(apiUrl),
-        headers: {
-          'Authorization': globals.token,
-          'Content-Type': 'application/json',
-        },
-      );
+  setState(() {
+    isLoading = true;
+    errorMessage = '';
+  });
 
-      if (response.statusCode == 200 && response.body.isNotEmpty) {
-        final decoded = json.decode(response.body);
+  try {
+    const apiUrl = 'http://4.227.176.4:8081/api/employee/';
+    final response = await http.get(
+      Uri.parse(apiUrl),
+      headers: {
+        'Authorization': globals.token, // Add Bearer prefix
+        'Content-Type': 'application/json',
+      },
+    );
 
-        if (decoded["code"] == 200 && decoded["data"] is List) {
-          setState(() {
-            employees =
-                decoded["data"].map((employee) {
-                  return {
-                    'id': employee['employee_id'].toString(),
-                    'name': employee['employee_name'] ?? 'No Name',
-                    'department': employee['department'] ?? 'No Department',
-                    'type': employee['user_type'] ?? 'Regular User',
-                  };
-                }).toList();
-          });
-        } else {
-          setState(() {
-            errorMessage = 'Invalid data format';
-          });
-        }
+    print('Status Code: ${response.statusCode}');
+    print('Response Body: "${response.body}"');
+
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final decoded = json.decode(response.body);
+
+      if (decoded["code"] == 200 && decoded["data"] is List) {
+        setState(() {
+          employees = decoded["data"].map((employee) {
+            return {
+              'id': employee['employee_id'].toString(),
+              'name': employee['employee_name'] ?? 'No Name',
+              'department': employee['department'] ?? 'No Department',
+              'type': employee['user_type'] ?? 'Regular User',
+            };
+          }).toList();
+        });
       } else {
         setState(() {
-          errorMessage = 'Failed to fetch employees: ${response.statusCode}';
+          errorMessage = 'Invalid data format';
         });
+      }
+    } else {
+      setState(() {
+        errorMessage = 'Failed to fetch employees: ${response.statusCode}';
+      });
+    }
+  } catch (e) {
+    setState(() {
+      errorMessage = 'Error fetching employees: ${e.toString()}';
+    });
+  } finally {
+    setState(() {
+      isLoading = false;
+    });
+  }
+}
+
+
+  Future<void> _deleteEmployee(String employeeId) async {
+    if (globals.token == "") {
+    setState(() {
+      errorMessage = "No token found";
+    });
+    return;
+  }
+
+  setState(() {
+    isLoading = true;
+    errorMessage = '';
+  });
+    try {
+      // Replace with your actual API endpoint
+      final apiUrl = 'http://4.227.176.4:8081/api/employee/$employeeId';
+      final response = await http.delete(
+      Uri.parse(apiUrl),
+      headers: {
+        'Authorization': globals.token,
+      },
+    );
+
+
+      if (response.statusCode == 200) {
+        // Refresh the employee list after successful deletion
+        await _fetchEmployees();
+      } else {
+        throw Exception('Failed to delete employee: ${response.statusCode}');
       }
     } catch (e) {
       setState(() {
-        errorMessage = 'Error fetching employees: ${e.toString()}';
-      });
-    } finally {
-      setState(() {
-        isLoading = false;
+        errorMessage = 'Error deleting employee: ${e.toString()}';
       });
     }
   }
@@ -112,6 +155,7 @@ class _EmployeePageState extends State<EmployeePage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            // 🔍 Search Bar
             TextField(
               controller: searchController,
               onChanged: (value) {
@@ -132,6 +176,8 @@ class _EmployeePageState extends State<EmployeePage> {
               ),
             ),
             const SizedBox(height: 20),
+
+            // Error message
             if (errorMessage.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
@@ -140,9 +186,12 @@ class _EmployeePageState extends State<EmployeePage> {
                   style: const TextStyle(color: Colors.red),
                 ),
               ),
+
+            // Loading indicator
             if (isLoading)
               const Center(child: CircularProgressIndicator())
             else ...[
+              // 📋 Table Header
               const Row(
                 children: [
                   Expanded(
@@ -176,6 +225,8 @@ class _EmployeePageState extends State<EmployeePage> {
                 ],
               ),
               const Divider(color: Colors.grey),
+
+              // 📄 Table Body
               Expanded(
                 child:
                     filteredEmployees.isEmpty
@@ -189,6 +240,8 @@ class _EmployeePageState extends State<EmployeePage> {
                           itemCount: filteredEmployees.length,
                           itemBuilder: (context, index) {
                             final emp = filteredEmployees[index];
+                            final isExpanded = expandedRows.contains(index);
+
                             return Column(
                               children: [
                                 Row(
@@ -218,43 +271,100 @@ class _EmployeePageState extends State<EmployeePage> {
                                       ),
                                     ),
                                     IconButton(
-                                      icon: const Icon(
-                                        Icons.arrow_forward_ios,
+                                      icon: Icon(
+                                        isExpanded
+                                            ? Icons.expand_less
+                                            : Icons.more_vert,
                                         color: Colors.white70,
                                       ),
                                       onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder:
-                                                (_) => EmployeeDetailPage(
-                                                  id: emp['id']!,
-                                                  name: emp['name']!,
-                                                  department:
-                                                      emp['department'] ?? '',
-                                                  type: emp['type'] ?? '',
-                                                ),
-                                          ),
-                                        ).then((_) {
-                                          _fetchEmployees();
+                                        setState(() {
+                                          if (isExpanded) {
+                                            expandedRows.remove(index);
+                                          } else {
+                                            expandedRows.add(index);
+                                          }
                                         });
                                       },
                                     ),
                                   ],
                                 ),
+                                if (isExpanded)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      left: 12,
+                                      bottom: 10,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        ElevatedButton.icon(
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => EditEmployeePage(
+                                                  id: emp['id']!,
+                                                  name: emp['name']!,
+                                                  department: emp['department'] ?? '',
+                                                  type: emp['type'] ?? '',
+                                                ),
+                                              ),
+                                            ).then((_) {
+                                              _fetchEmployees(); // Refresh after editing
+                                            });
+                                          },
+                                          icon: const Icon(
+                                            Icons.edit,
+                                            size: 16,
+                                          ),
+                                          label: const Text('Edit'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor:
+                                                Colors.orangeAccent,
+                                            foregroundColor: Colors.black,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        ElevatedButton.icon(
+                                          onPressed: () async {
+                                            await _deleteEmployee(emp['id']!);
+                                          },
+                                          icon: const Icon(
+                                            Icons.delete,
+                                            size: 16,
+                                          ),
+                                          label: const Text('Delete'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.redAccent,
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 const Divider(color: Colors.grey),
                               ],
                             );
                           },
                         ),
               ),
+
               const SizedBox(height: 20),
+
+              // ➕ Add New Employee Button
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const AddEmployeePage()),
                   ).then((_) {
+                    // Refresh the list when returning from AddEmployeePage
                     _fetchEmployees();
                   });
                 },

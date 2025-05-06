@@ -17,9 +17,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      //child: MaterialApp(title: 'SLB APP', home: LoginScreen(),),
+      child: MaterialApp(title: 'SLB APP', home: LoginScreen(),),
       create: (context) => inventory_provider.UserProducts(),
-      child: MaterialApp(title: 'SLB APP', home: HomePage(),)
+      //child: MaterialApp(title: 'SLB APP', home: HomePage(),)
     );
   }
 }

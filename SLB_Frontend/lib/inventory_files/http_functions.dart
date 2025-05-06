@@ -33,7 +33,7 @@ Future<List<String>> getUserParts() async {
 Future<List> getUserProducts() async {
   List items = [];
   print("getting user products");
-  /*final String sendUrl = 'http://172.191.111.81:8081/api/components/borrowed';
+  final String sendUrl = 'http://172.191.111.81:8081/api/components/borrowed';
   final response = await http.get(  
     Uri.parse(sendUrl),
     //uri,
@@ -51,8 +51,8 @@ Future<List> getUserProducts() async {
     print(response.statusCode);
     print(response.body);
     //throw Exception('Unable to connect');
-  }*/
-  items = [
+  }
+  /*items = [
     {'productId': 1, 'partNumber': 01, 'partId': 00},
     {'productId': 1, 'partNumber': 01, 'partId': 01},
     {'productId': 1, 'partNumber': 02, 'partId': 00},
@@ -64,7 +64,7 @@ Future<List> getUserProducts() async {
     {'productId': 2, 'partNumber': 00, 'partId': 03},
     {'productId': 2, 'partNumber': 04, 'partId': 03},
     //{'productId': 1, 'partNumber': 04, 'partId': 03},
-  ];
+  ];*/
   return items;
 }
 

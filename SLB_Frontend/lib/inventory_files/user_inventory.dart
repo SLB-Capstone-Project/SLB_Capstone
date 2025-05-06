@@ -40,8 +40,8 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
     return Scaffold(
       appBar: AppBar(
         title: Text('Inventory'),
-        backgroundColor: Colors.brown,
-        toolbarHeight: 60.0,
+        backgroundColor: const Color.fromRGBO(38, 38, 50, 1),
+        toolbarHeight: 56.0,
         titleTextStyle: const TextStyle(
           fontSize: 32.0,
           fontWeight: FontWeight.bold,
@@ -54,21 +54,60 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
             Navigator.pop(context);
           }
         ),
-      bottom: TabBar(
+      /*bottom: TabBar(
         labelColor: const Color.fromRGBO(240, 240, 240, 1),
         unselectedLabelColor: const Color.fromRGBO(240, 240, 240, 1),
           controller: _tabController,
           tabs: myTabs,
-        ),
+        ),*/
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [ 
-          ProductList(),
-          PartList(product:0, specific:false),
-          PartIdList(product:0, part:0, specific:false),
-        ],
-      ),
+      body: 
+      Container( 
+        color: const Color.fromRGBO(10, 10, 10, 1),
+        child: Padding( 
+        padding: EdgeInsets.all(16.0),
+        child: Column( 
+        children: [
+          Expanded(
+            //height: 500,
+            child: TabBarView(
+            controller: _tabController,
+            children: [ 
+              ProductList(),
+              //PartList(product:0, specific:false),
+              PartList(product: null, specific: false),
+              PartIdList(product: null, part: null, specific:false),
+              //PartIdList(specific:false),
+            ],
+          )),
+          navBar()
+        ]
+      )))
     );
+  }
+
+  Widget navBar() {
+    return 
+    Container( 
+      color: const Color.fromRGBO(10, 10, 10, 1),
+      child: Container(  
+      height: 48,
+      decoration: BoxDecoration( 
+        borderRadius: BorderRadius.horizontal(  
+          right: Radius.circular(16),
+          left: Radius.circular(16),
+        ),
+        color: const Color.fromRGBO(38, 38, 50, 1),
+      ),
+      //color: const Color.fromRGBO(100, 100, 100, 1),
+      margin: EdgeInsets.all(32.0),
+      child: TabBar(  
+        controller: _tabController,
+        tabs: myTabs,
+        labelColor: const Color.fromRGBO(240, 240, 240, 1),
+        unselectedLabelColor: const Color.fromRGBO(240, 240, 240, 1),
+        dividerColor: Colors.transparent,
+      )
+    ));
   }
 }

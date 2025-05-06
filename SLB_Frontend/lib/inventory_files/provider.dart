@@ -1,20 +1,21 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'http_functions.dart' as http_funct;
 import 'dart:core';
 
 
 class UserProducts extends ChangeNotifier {
   List<int> products = [];
-  List<int> parts = [];
+  List<String> parts = [];
   List<int> partIds = [];
 
   //var part = Map<int, List<Map<String, dynamic>>>; //maps part to part information
   var partInfo = Map<int, List<Map<String, int>>>(); //maps the information associated to each partId
   //List<Map<String, dynamic>> products = [];
 
-  var productToPart = <int, Set<int>>{}; //map product to parts
+  var productToPart = <int, Set<String>>{}; //map product to parts
   var partToId = <String, Set<int>>{}; //map product and part to partId
 
   int get getProductLength => products.length;
@@ -35,16 +36,17 @@ class UserProducts extends ChangeNotifier {
         };
         //partInfo.update(partId, (value) => value + [temp_partId], ifAbsent: () => [temp_partId]);
 
-        productToPart.update(productId, (value) => (value.toList() + [part]).toSet(), ifAbsent: () => {part});
+        productToPart.update(productId, (value) => (value.toList() + ["$productId $part"]).toSet(), ifAbsent: () =>{"$productId $part"});
         partToId.update("$productId $part", (value) => (value.toList() + [partId]).toSet(), ifAbsent: () => {partId});
+
         products.add(productId);
-        parts.add(int.parse("$productId$part"));
+        parts.add("$productId $part");
         partIds.add(int.parse("$productId$part$partId"));
       }
       products = products.toSet().toList();
       parts = parts.toSet().toList();
       partIds = partIds.toSet().toList();
-
+     
       products.sort();
       parts.sort();
       partIds.sort();
@@ -60,21 +62,29 @@ class UserProducts extends ChangeNotifier {
     return products[index];
   }
 
-  int getParts(int index) {
+  /*int getParts(int index) {
     return parts[index];
-  }
+  }*/
 
   UnmodifiableListView<int> get getAllProduct => UnmodifiableListView(products);
-  UnmodifiableListView<int> get getAllParts => UnmodifiableListView(parts);
+  UnmodifiableListView<String> get getAllParts => UnmodifiableListView(parts);
   UnmodifiableListView<int> get getAllPartIds => UnmodifiableListView(partIds);
 
-  List<int>? getPartList(int product) {
-    List<int>? partList = productToPart[product]?.toList() ?? []; //gets list of parts for product
+  List<String>? getPartList(int product) {
+    List<String>? partList = productToPart[product]?.toList() ?? []; //gets list of parts for product
     return partList;
   }
 
   List<int>? getPartIdList(int product, int part) {
     List<int>? partIdList = partToId["$product $part"]?.toList() ?? []; //gets list of partId's for product/part  
     return partIdList;
+  }
+
+  int getNumParts(int product) {
+    return productToPart[product]?.toList().length ?? 0;
+  }
+
+  int getNumPartIds(String productPart) {
+    return partToId[productPart]?.toList().length ?? 0;
   }
 }

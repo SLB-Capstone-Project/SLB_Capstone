@@ -19,12 +19,7 @@ class _PartManagementPageState extends State<PartManagementPage> {
   final List<Map<String, dynamic>> _operationHistory = [];
 
   List<Map<String, String>> parts = [
-    {
-      'id': 'P001',
-      'name': 'Gearbox',
-      'category': 'Mechanical',
-      'type': 'Product',
-    },
+    {'id': 'P001', 'name': 'Gearbox', 'category': 'Mechanical', 'type': 'Product'},
     {'id': 'P002', 'name': 'Sensor', 'category': 'Electronics', 'type': 'Part'},
     {'id': 'P003', 'name': 'Valve', 'category': 'Hydraulics', 'type': 'Part'},
   ];
@@ -48,48 +43,43 @@ class _PartManagementPageState extends State<PartManagementPage> {
   void _addRangeOfProducts() {
     showDialog(
       context: context,
-      builder:
-          (context) => _AddRangeDialog(
-            onAdd: (startId, endId, name, category, type) {
-              final startNum = int.parse(startId.replaceAll('P', ''));
-              final endNum = int.parse(endId.replaceAll('P', ''));
+      builder: (context) => _AddRangeDialog(
+        onAdd: (startId, endId, name, category, type) {
+          final startNum = int.parse(startId.replaceAll('P', ''));
+          final endNum = int.parse(endId.replaceAll('P', ''));
 
-              if (startNum > endNum) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('End ID must be greater than Start ID'),
-                  ),
-                );
-                return;
-              }
+          if (startNum > endNum) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('End ID must be greater than Start ID')));
+            return;
+          }
 
-              setState(() {
-                for (int i = startNum; i <= endNum; i++) {
-                  final id = 'P${i.toString().padLeft(3, '0')}';
-                  parts.add({
-                    'id': id,
-                    'name': name,
-                    'category': category,
-                    'type': type,
-                  });
-                }
-
-                _operationHistory.add({
-                  'action': 'Added range',
-                  'details':
-                      'Added ${endNum - startNum + 1} parts ($startId-$endId)',
-                  'timestamp': DateTime.now().toString(),
-                  'params': {
-                    'startId': startId,
-                    'endId': endId,
-                    'name': name,
-                    'category': category,
-                    'type': type,
-                  },
-                });
+          setState(() {
+            for (int i = startNum; i <= endNum; i++) {
+              final id = 'P${i.toString().padLeft(3, '0')}';
+              parts.add({
+                'id': id,
+                'name': name,
+                'category': category,
+                'type': type,
               });
-            },
-          ),
+            }
+
+            _operationHistory.add({
+              'action': 'Added range',
+              'details': 'Added ${endNum - startNum + 1} parts ($startId-$endId)',
+              'timestamp': DateTime.now().toString(),
+              'params': {
+                'startId': startId,
+                'endId': endId,
+                'name': name,
+                'category': category,
+                'type': type,
+              },
+            });
+          });
+        },
+      ),
     );
   }
 
@@ -105,20 +95,15 @@ class _PartManagementPageState extends State<PartManagementPage> {
             childAspectRatio: 1,
             mainAxisSpacing: 10,
             crossAxisSpacing: 10,
-            children:
-                parts
-                    .map(
-                      (part) => pw.Container(
-                        margin: pw.EdgeInsets.all(10),
-                        child: pw.BarcodeWidget(
-                          barcode: pw.Barcode.qrCode(),
-                          data: part['id']!,
-                          width: 30,
-                          height: 30,
-                        ),
-                      ),
-                    )
-                    .toList(),
+            children: parts.map((part) => pw.Container(
+              margin: pw.EdgeInsets.all(10),
+              child: pw.BarcodeWidget(
+                barcode: pw.Barcode.qrCode(),
+                data: part['id']!,
+                width: 30,
+                height: 30,
+              ),
+            )).toList(),
           );
         },
       ),
@@ -132,21 +117,18 @@ class _PartManagementPageState extends State<PartManagementPage> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredParts =
-        parts.where((item) {
-          final query = searchQuery.toLowerCase();
-          return item['name']!.toLowerCase().contains(query) ||
-              item['category']!.toLowerCase().contains(query) ||
-              item['id']!.contains(query);
-        }).toList();
+    final filteredParts = parts.where((item) {
+      final query = searchQuery.toLowerCase();
+      return item['name']!.toLowerCase().contains(query) ||
+          item['category']!.toLowerCase().contains(query) ||
+          item['id']!.contains(query);
+    }).toList();
 
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text(
-          'Product / Part Management',
-          style: TextStyle(color: Colors.white, fontSize: 18),
-        ),
+        title: const Text('Product / Part Management',
+            style: TextStyle(color: Colors.white, fontSize: 18)),
         backgroundColor: Colors.black,
         elevation: 0,
         actions: [
@@ -189,83 +171,61 @@ class _PartManagementPageState extends State<PartManagementPage> {
                     children: [
                       Row(
                         children: [
-                          Expanded(
-                            child: Text(
-                              part['id']!,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              part['name']!,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              part['type']!,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
+                          Expanded(child: Text(part['id']!,
+                              style: const TextStyle(color: Colors.white))),
+                          Expanded(child: Text(part['name']!,
+                              style: const TextStyle(color: Colors.white))),
+                          Expanded(child: Text(part['type']!,
+                              style: const TextStyle(color: Colors.white))),
                           IconButton(
-                            icon: Icon(
-                              isExpanded ? Icons.expand_less : Icons.more_vert,
-                              color: Colors.white70,
-                            ),
-                            onPressed:
-                                () => setState(() {
-                                  isExpanded
-                                      ? expandedRows.remove(index)
-                                      : expandedRows.add(index);
-                                }),
+                            icon: Icon(isExpanded ? Icons.expand_less : Icons.more_vert,
+                                color: Colors.white70),
+                            onPressed: () => setState(() {
+                              isExpanded ? expandedRows.remove(index) : expandedRows.add(index);
+                            }),
                           ),
                         ],
                       ),
-                      if (isExpanded)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 12, bottom: 10),
-                          child: Row(
-                            children: [
-                              ElevatedButton(
-                                onPressed: () => _editPart(part, index),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orangeAccent,
-                                  foregroundColor: Colors.black,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                  ),
-                                ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.edit, size: 16),
-                                    SizedBox(width: 4),
-                                    Text('Edit'),
-                                  ],
-                                ),
+                      if (isExpanded) Padding(
+                        padding: const EdgeInsets.only(left: 12, bottom: 10),
+                        child: Row(
+                          children: [
+                            ElevatedButton(
+                              onPressed: () => _editPart(part, index),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orangeAccent,
+                                foregroundColor: Colors.black,
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
                               ),
-                              const SizedBox(width: 10),
-                              ElevatedButton(
-                                onPressed: () => _deletePart(index),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.redAccent,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                  ),
-                                ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.delete, size: 16),
-                                    SizedBox(width: 4),
-                                    Text('Delete'),
-                                  ],
-                                ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.edit, size: 16),
+                                  SizedBox(width: 4),
+                                  Text('Edit'),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(width: 10),
+                            ElevatedButton(
+                              onPressed: () => _deletePart(index),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.redAccent,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.delete, size: 16),
+                                  SizedBox(width: 4),
+                                  Text('Delete'),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
+                      ),
                       const Divider(color: Colors.grey),
                     ],
                   );
@@ -301,13 +261,8 @@ class _PartManagementPageState extends State<PartManagementPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      'Add Product',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: const Text('Add Product',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -321,13 +276,8 @@ class _PartManagementPageState extends State<PartManagementPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      'Add Range',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: const Text('Add Range',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],
@@ -342,13 +292,12 @@ class _PartManagementPageState extends State<PartManagementPage> {
     final editedPart = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder:
-            (_) => EditPartPage(
-              id: part['id']!,
-              name: part['name']!,
-              category: part['category']!,
-              type: part['type']!,
-            ),
+        builder: (_) => EditPartPage(
+          id: part['id']!,
+          name: part['name']!,
+          category: part['category']!,
+          type: part['type']!,
+        ),
       ),
     );
 
@@ -387,12 +336,8 @@ class _AddRangeDialog extends StatefulWidget {
 
 class __AddRangeDialogState extends State<_AddRangeDialog> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _startIdController = TextEditingController(
-    text: 'P001',
-  );
-  final TextEditingController _endIdController = TextEditingController(
-    text: 'P010',
-  );
+  final TextEditingController _startIdController = TextEditingController(text: 'P001');
+  final TextEditingController _endIdController = TextEditingController(text: 'P010');
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _categoryController = TextEditingController();
   String _selectedType = 'Part';
@@ -401,7 +346,8 @@ class __AddRangeDialogState extends State<_AddRangeDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.grey[900],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Form(
@@ -409,14 +355,11 @@ class __AddRangeDialogState extends State<_AddRangeDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Add Range of Products',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text('Add Range of Products',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold)),
 
               const SizedBox(height: 20),
 
@@ -435,17 +378,14 @@ class __AddRangeDialogState extends State<_AddRangeDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.white70),
-                    ),
+                    child: const Text('Cancel',
+                        style: TextStyle(color: Colors.white70)),
                     onPressed: () => Navigator.pop(context),
                   ),
                   const SizedBox(width: 10),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7B544C),
-                    ),
+                        backgroundColor: const Color(0xFF7B544C)),
                     child: const Text('Confirm'),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
@@ -494,18 +434,10 @@ class __AddRangeDialogState extends State<_AddRangeDialog> {
   Widget _buildTypeDropdown() {
     return DropdownButtonFormField<String>(
       value: _selectedType,
-      items:
-          ['Product', 'Part']
-              .map(
-                (type) => DropdownMenuItem<String>(
-                  value: type,
-                  child: Text(
-                    type,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-              )
-              .toList(),
+      items: ['Product', 'Part'].map((type) => DropdownMenuItem<String>(
+        value: type,
+        child: Text(type, style: const TextStyle(color: Colors.white)),
+      )).toList(),
       onChanged: (String? value) {
         setState(() => _selectedType = value!);
       },

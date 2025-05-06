@@ -5,7 +5,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../globals.dart' as globals;
 
-
 class AddEmployeePage extends StatefulWidget {
   const AddEmployeePage({super.key});
 
@@ -21,7 +20,8 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
   final TextEditingController departmentController = TextEditingController();
 
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   String selectedType = 'Regular User';
   bool _obscurePassword = true;
@@ -37,21 +37,31 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
       print("No token found");
       return;
     }
-    if (idController.text.isEmpty || nameController.text.isEmpty || departmentController.text.isEmpty || passwordController.text.isEmpty || confirmPasswordController.text.isEmpty) {
+    if (idController.text.isEmpty ||
+        nameController.text.isEmpty ||
+        departmentController.text.isEmpty ||
+        passwordController.text.isEmpty ||
+        confirmPasswordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("All fields are required"), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text("All fields are required"),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
     if (passwordController.text != confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Passwords do not match"), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text("Passwords do not match"),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
-    final String apiUrl = "http://172.191.111.81:8081/api/employee/";
+    final String apiUrl = "http://4.227.176.4:8081/api/employee/";
 
     // Hash the password before sending it to the server
     String hashedPassword = hashPassword(passwordController.text);
@@ -74,22 +84,20 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
       print(response.statusCode);
       final responseBody = json.decode(response.body);
       if (response.statusCode == 200 && responseBody["code"] == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Register Success!")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Register Success!")));
 
         Navigator.pop(context);
       } else {
         print(responseBody);
         throw Exception('Failed to add employees: ${response.statusCode}');
       }
-      
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
       );
     }
-
   }
 
   @override
@@ -97,7 +105,10 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Add Employee', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Add Employee',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.black,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -115,22 +126,31 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
               buildTextField(
                 controller: idController,
                 label: 'Employee ID',
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Please enter an ID' : null,
+                validator:
+                    (value) =>
+                        value == null || value.isEmpty
+                            ? 'Please enter an ID'
+                            : null,
               ),
               const SizedBox(height: 16),
               buildTextField(
                 controller: nameController,
                 label: 'Employee Name',
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Please enter a name' : null,
+                validator:
+                    (value) =>
+                        value == null || value.isEmpty
+                            ? 'Please enter a name'
+                            : null,
               ),
               const SizedBox(height: 16),
               buildTextField(
                 controller: departmentController,
                 label: 'Department',
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Please enter a department' : null,
+                validator:
+                    (value) =>
+                        value == null || value.isEmpty
+                            ? 'Please enter a department'
+                            : null,
               ),
               const SizedBox(height: 16),
 
@@ -138,8 +158,11 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                 controller: passwordController,
                 label: 'Password',
                 obscureText: _obscurePassword,
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Please enter a password' : null,
+                validator:
+                    (value) =>
+                        value == null || value.isEmpty
+                            ? 'Please enter a password'
+                            : null,
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -194,13 +217,13 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                 ),
                 style: const TextStyle(color: Colors.white),
 
-                items: ['Admin', 'Regular User']
-
-                    .map((type) => DropdownMenuItem(
-                          value: type,
-                          child: Text(type),
-                        ))
-                    .toList(),
+                items:
+                    ['Admin', 'Regular User']
+                        .map(
+                          (type) =>
+                              DropdownMenuItem(value: type, child: Text(type)),
+                        )
+                        .toList(),
                 onChanged: (value) {
                   setState(() {
                     selectedType = value!;
@@ -211,23 +234,27 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-
                     _register();
-
                   }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF7B544C),
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 14,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: const Text(
                   'Add',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -242,7 +269,6 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
 
     bool obscureText = false,
     Widget? suffixIcon,
-
   }) {
     return TextFormField(
       controller: controller,
@@ -256,13 +282,10 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
         labelStyle: const TextStyle(color: Colors.white),
         filled: true,
         fillColor: Colors.grey[900],
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
 
         suffixIcon: suffixIcon,
       ),
     );
   }
 }
-

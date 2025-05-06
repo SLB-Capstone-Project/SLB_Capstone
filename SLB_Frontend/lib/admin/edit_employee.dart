@@ -27,6 +27,7 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
   late TextEditingController idController;
   late TextEditingController nameController;
   late TextEditingController departmentController;
+  late TextEditingController passwordController;
   late String selectedType;
 
   Future<void> _edit() async {
@@ -34,48 +35,52 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
       print("No token found");
       return;
     }
-    if (nameController.text.isEmpty || departmentController.text.isEmpty) {
+    if (nameController.text.isEmpty ||
+        departmentController.text.isEmpty ||
+        passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("All fields are required"), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text("All fields are required, including password"),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
-    final String apiUrl = "http://172.191.111.81:8081/api/employee/";
+    final String apiUrl = "http://4.227.176.4:8081/api/employee/";
+
+    final body = {
+      "employee_id": int.tryParse(idController.text) ?? 0,
+      "employee_name": nameController.text,
+      "password": passwordController.text,
+      "department": departmentController.text,
+      "user_type": selectedType,
+    };
 
     try {
       final response = await http.put(
         Uri.parse(apiUrl),
         headers: {
-          'Authorization': globals.token, // Include JWT in header
+          'Authorization': globals.token,
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          "employee_id": idController.text,
-          "employee_name": nameController.text,
-          "department": departmentController.text,
-          "user_type": selectedType,
-        }),
+        body: jsonEncode(body),
       );
-      print(response.statusCode);
+
       final responseBody = json.decode(response.body);
       if (response.statusCode == 200 && responseBody["code"] == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Edit Success!")),
-        );
-
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Edit Success!")));
         Navigator.pop(context);
       } else {
-        print(responseBody);
-        throw Exception('Failed to edit employees: ${response.statusCode}');
+        throw Exception('Failed to edit employee: ${response.statusCode}');
       }
-      
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
       );
     }
-
   }
 
   @override
@@ -84,6 +89,7 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
     idController = TextEditingController(text: widget.id);
     nameController = TextEditingController(text: widget.name);
     departmentController = TextEditingController(text: widget.department);
+    passwordController = TextEditingController();
     selectedType = widget.type;
   }
 
@@ -92,6 +98,7 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
     idController.dispose();
     nameController.dispose();
     departmentController.dispose();
+    passwordController.dispose();
     super.dispose();
   }
 
@@ -100,7 +107,10 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Edit Employee', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Edit Employee',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.black,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -113,9 +123,21 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
           key: _formKey,
           child: Column(
             children: [
-              buildTextField(controller: nameController, label: 'Employee Name'),
+              buildTextField(
+                controller: nameController,
+                label: 'Employee Name',
+              ),
               const SizedBox(height: 16),
-              buildTextField(controller: departmentController, label: 'Department'),
+              buildTextField(
+                controller: departmentController,
+                label: 'Department',
+              ),
+              const SizedBox(height: 16),
+              buildTextField(
+                controller: passwordController,
+                label: 'Password',
+                obscure: true,
+              ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: selectedType,
@@ -125,12 +147,15 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                   labelStyle: const TextStyle(color: Colors.white),
                   filled: true,
                   fillColor: Colors.grey[900],
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 style: const TextStyle(color: Colors.white),
-                items: ['Admin', 'Normal'].map((type) {
-                  return DropdownMenuItem(value: type, child: Text(type));
-                }).toList(),
+                items:
+                    ['Admin', 'Regular User'].map((type) {
+                      return DropdownMenuItem(value: type, child: Text(type));
+                    }).toList(),
                 onChanged: (value) {
                   if (value != null) setState(() => selectedType = value);
                 },
@@ -140,11 +165,22 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                 onPressed: _edit,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF7B544C),
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 14,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                child: const Text('Save Changes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              )
+                child: const Text(
+                  'Save Changes',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -152,11 +188,21 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
     );
   }
 
-  Widget buildTextField({required TextEditingController controller, required String label}) {
+  Widget buildTextField({
+    required TextEditingController controller,
+    required String label,
+    bool obscure = false,
+  }) {
     return TextFormField(
       controller: controller,
+      obscureText: obscure,
       style: const TextStyle(color: Colors.white),
-      validator: (value) => value == null || value.isEmpty ? 'Please enter $label' : null,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter $label';
+        }
+        return null;
+      },
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white),

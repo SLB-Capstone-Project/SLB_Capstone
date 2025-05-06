@@ -19,8 +19,10 @@ class _AddPartPageState extends State<AddPartPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Add Product / Part',
-            style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Add Product / Part',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.black,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -65,9 +67,7 @@ class _AddPartPageState extends State<AddPartPage> {
         labelText: label,
         filled: true,
         fillColor: Colors.grey[900],
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
@@ -75,18 +75,24 @@ class _AddPartPageState extends State<AddPartPage> {
   Widget _buildTypeDropdown() {
     return DropdownButtonFormField<String>(
       value: _selectedType,
-      items: ['Product', 'Part'].map((type) => DropdownMenuItem(
-        value: type,
-        child: Text(type, style: const TextStyle(color: Colors.white)),
-      )).toList(),
+      items:
+          ['Product', 'Part']
+              .map(
+                (type) => DropdownMenuItem(
+                  value: type,
+                  child: Text(
+                    type,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              )
+              .toList(),
       onChanged: (value) => setState(() => _selectedType = value!),
       decoration: InputDecoration(
         labelText: 'Type',
         filled: true,
         fillColor: Colors.grey[900],
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
       ),
       dropdownColor: Colors.grey[900],
     );

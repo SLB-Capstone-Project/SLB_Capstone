@@ -48,6 +48,13 @@ dependencies:
   crypto: ^3.0.6
   shared_preferences: ^2.5.3
   provider: ^6.1.5
+  pdf: ^3.11.3
+  qr_flutter: ^4.1.0
+  printing: ^5.14.2
+  file_selector: ^1.0.3
+  excel: ^4.0.6
+  open_file: ^3.5.10
+  barcode_widget: ^2.0.4
 
 dev_dependencies:
   flutter_test:

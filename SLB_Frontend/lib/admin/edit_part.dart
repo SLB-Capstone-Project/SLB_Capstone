@@ -88,14 +88,11 @@ class _EditPartPageState extends State<EditPartPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  'Save Changes',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
+                child: const Text('Save Changes',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16)),
               ),
             ],
           ),
@@ -129,18 +126,10 @@ class _EditPartPageState extends State<EditPartPage> {
   Widget _buildTypeDropdown() {
     return DropdownButtonFormField<String>(
       value: _selectedType,
-      items:
-          ['Product', 'Part']
-              .map(
-                (type) => DropdownMenuItem(
-                  value: type,
-                  child: Text(
-                    type,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-              )
-              .toList(),
+      items: ['Product', 'Part'].map((type) => DropdownMenuItem(
+        value: type,
+        child: Text(type, style: const TextStyle(color: Colors.white)),
+      )).toList(),
       onChanged: (String? value) {
         if (value != null) {
           setState(() => _selectedType = value);

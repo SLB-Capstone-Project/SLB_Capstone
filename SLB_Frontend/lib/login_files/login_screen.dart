@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart'; // Import for hashing
+import 'package:provider/provider.dart';
 
 import '../admin/employee_management.dart';
-import '../home_page.dart';
+import '../homepage_files/home_page.dart';
+import '../homepage_files/provider.dart' as history_provider;
 import "../globals.dart" as globals;
 
 class LoginScreen extends StatefulWidget {
@@ -66,7 +68,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
         final access_token = responseBody["data"];
         globals.token = access_token;
-
+        Provider.of<history_provider.UserHistory>(context, listen: false).getUserHistory();
+        
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => HomePage()),

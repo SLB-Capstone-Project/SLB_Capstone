@@ -5,14 +5,16 @@ import 'package:flutter/gestures.dart';
 import 'package:namer_app/login_files/login_screen.dart';
 //import 'inventory.dart';
 //import 'tabbed_inventory.dart';
-import 'checkin_files/checkin_page.dart';
-import 'inventory_files/user_inventory.dart';
+import '../checkin_files/checkin_page.dart';
+import '../inventory_files/user_inventory.dart';
 import 'package:provider/provider.dart';
-import 'admin/admin_main.dart';
+import '../admin/admin_main.dart';
 //import 'package:http/http.dart' as http;
-import 'globals.dart' as global;
-import 'inventory_files/http_functions.dart' as http_funct;
-import 'inventory_files/provider.dart' as inventory_provider;
+import '../globals.dart' as global;
+import '../inventory_files/http_functions.dart' as http_funct;
+import '../inventory_files/provider.dart' as inventory_provider;
+import 'provider.dart' as history_provider;
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -147,6 +149,32 @@ class HomePageState extends State<HomePage> {
         ),
     );
   }
+
+
+  /*Widget navBar() {
+    return 
+    Container( 
+      color: const Color.fromRGBO(10, 10, 10, 1),
+      child: Container(  
+      height: 48,
+      decoration: BoxDecoration( 
+        borderRadius: BorderRadius.horizontal(  
+          right: Radius.circular(16),
+          left: Radius.circular(16),
+        ),
+        color: const Color.fromRGBO(38, 38, 50, 1),
+      ),
+      //color: const Color.fromRGBO(100, 100, 100, 1),
+      margin: EdgeInsets.all(32.0),
+      child: TabBar(  
+        controller: _tabController,
+        tabs: myTabs,
+        labelColor: const Color.fromRGBO(240, 240, 240, 1),
+        unselectedLabelColor: const Color.fromRGBO(240, 240, 240, 1),
+        dividerColor: Colors.transparent,
+      )
+    ));
+  }*/
 }
 
 class HomePageList extends StatelessWidget {
@@ -159,7 +187,7 @@ class HomePageList extends StatelessWidget {
   /*Map<String, List<dynamic>> map = [
 
   ];*/
-  List<Map<String, String>> userHistory = [
+  /*List<Map<String, String>> userHistory = [
     {'title': 'History 1', },
     {'title': 'History 2', },
        {'title': 'History 1', },
@@ -168,12 +196,12 @@ class HomePageList extends StatelessWidget {
     {'title': 'History 2', },
        {'title': 'History 1', },
     {'title': 'History 2', },
-  ];
+  ];*/
 
-  List<Map<String,String>> notifications = [
+  /*List<Map<String,String>> notifications = [
     {'title': 'notification 1'},
     {'title': 'notification 2'},
-  ];
+  ];*/
   
   HomePageList({super.key});
 
@@ -197,10 +225,10 @@ class HomePageList extends StatelessWidget {
                   var card_name = homePageList[index]['card_name'];
                   List list = [];
                   if(card_name == 'history') {
-                    list = userHistory;
+                    list = Provider.of<history_provider.UserHistory>(context, listen: false).getAllHistory;
                   }
                   else if(card_name == 'notifications') {
-                    list = notifications;
+                    //list = notifications;
                   }
                   if(card_name == 'inventory') {
                     return inventoryTile();
@@ -234,8 +262,12 @@ class HomePageList extends StatelessWidget {
                                       color:const Color.fromRGBO(30, 30, 38, 1),
                                       child: ListTile(  
                                         //tileColor: const Color.fromRGBO(30, 30, 38, 1),
+                                        title: Text(style: TextStyle(color: const Color.fromRGBO(240, 240, 240, 1)),
+                                          list[index]['part'].toString()),
                                         leading: Text(style: TextStyle(color: const Color.fromRGBO(240, 240, 240, 1)),
-                                          list[index]['title'])
+                                          list[index]['action'].toString()),
+                                        subtitle: Text(style: TextStyle(color: const Color.fromRGBO(240, 240, 240, 1)),
+                                          list[index]['time'].toString()),
                                       )
                                     );
                                   },

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 //import 'home_page.dart';
 import 'login_files/login_screen.dart';
-import 'home_page.dart';
+import 'homepage_files/home_page.dart';
 import 'package:provider/provider.dart';
 import 'inventory_files/provider.dart' as inventory_provider;
+import 'homepage_files/provider.dart' as history_provider;
 //import 'camera_page.dart';
 
 
@@ -16,10 +17,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      child: MaterialApp(title: 'SLB APP', home: LoginScreen(),),
-      create: (context) => inventory_provider.UserProducts(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => inventory_provider.UserProducts()),
+        ChangeNotifierProvider(create: (context) => history_provider.UserHistory())
+      ],
       //child: MaterialApp(title: 'SLB APP', home: HomePage(),)
+      child: MaterialApp(title: 'SLB APP', home: LoginScreen(),),
     );
   }
 }

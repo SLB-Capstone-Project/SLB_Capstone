@@ -37,7 +37,7 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    /*return Scaffold(
       appBar: AppBar(
         title: Text('Inventory'),
         backgroundColor: const Color.fromRGBO(38, 38, 50, 1),
@@ -61,29 +61,26 @@ class _UserInventoryState extends State<UserInventory> with SingleTickerProvider
           tabs: myTabs,
         ),*/
       ),
-      body: 
-      Container( 
-        color: const Color.fromRGBO(10, 10, 10, 1),
-        child: Padding( 
-        padding: EdgeInsets.all(16.0),
-        child: Column( 
-        children: [
-          Expanded(
-            //height: 500,
-            child: TabBarView(
-            controller: _tabController,
-            children: [ 
-              ProductList(),
-              //PartList(product:0, specific:false),
-              PartList(product: null, specific: false),
-              PartIdList(product: null, part: null, specific:false),
-              //PartIdList(specific:false),
-            ],
-          )),
-          navBar()
-        ]
-      )))
-    );
+      body: */
+    return Material( 
+      color: const Color.fromRGBO(10, 10, 10, 1),
+      child: Column( 
+      children: [
+        Expanded(
+          //height: 500,
+          child: TabBarView(
+          controller: _tabController,
+          children: [ 
+            ProductList(),
+            //PartList(product:0, specific:false),
+            PartList(product: null, specific: false),
+            PartIdList(product: null, part: null, specific:false),
+            //PartIdList(specific:false),
+          ],
+        )),
+        navBar()
+      ]
+    ));
   }
 
   Widget navBar() {

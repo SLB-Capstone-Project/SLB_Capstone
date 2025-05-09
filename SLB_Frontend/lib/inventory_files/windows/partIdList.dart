@@ -23,25 +23,25 @@ class PartIdList extends StatelessWidget {
       color: const Color.fromRGBO(10, 10, 10, 1),
       child: Column (
         children: [
-          if(specific) AppBar(
-            title: Text('Part Ids for product/part $product$part'),
+          AppBar(
+            title: Text('Inventory'),
             backgroundColor: const Color.fromRGBO(38, 38, 50, 1),
             toolbarHeight: 56.0,
             titleTextStyle: const TextStyle(
-              fontSize: 20.0,
+              fontSize: 32.0,
               fontWeight: FontWeight.bold,
               color:  Color.fromRGBO(240, 240, 240, 1),
             ),
-            /*leading: IconButton(  
-              icon: const Icon(Icons.home),
+            leading: BackButton(  
+              //icon: const IconButton.backButton,
               color: const Color.fromRGBO(240, 240, 240, 1),
               onPressed: () {
                 Navigator.pop(context);
               }
-            ),*/
+            ),
           ),
           Flexible(
-            child: CustomScrollView(
+            child: Padding(padding: EdgeInsets.all(16.0), child: CustomScrollView(
               slivers: <Widget>[
                 SliverList(
                   delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
@@ -144,7 +144,7 @@ class PartIdList extends StatelessWidget {
                 ),
               ],
             )
-          )
+          ))
         ]
       )
     ));

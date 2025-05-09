@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 
 class EditPartPage extends StatefulWidget {
-  final String id;
-  final String name;
-  final String category;
-  final String type;
+  final int partNumber;
+  final int partId;
+  final String partName;
+  final int borrowedEmployeeId;
+  final String status;
+  final int cost;
+  final int productId;
 
   const EditPartPage({
     super.key,
-    required this.id,
-    required this.name,
-    required this.category,
-    required this.type,
+    required this.partNumber,
+    required this.partId,
+    required this.partName,
+    required this.borrowedEmployeeId,
+    required this.status,
+    required this.cost,
+    required this.productId,
   });
 
   @override
@@ -20,35 +26,53 @@ class EditPartPage extends StatefulWidget {
 
 class _EditPartPageState extends State<EditPartPage> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _idController;
-  late TextEditingController _nameController;
-  late TextEditingController _categoryController;
-  late String _selectedType;
+  // late TextEditingController _partNumberController;
+  // late TextEditingController _partIdController;
+  late TextEditingController _partNameController;
+  // late TextEditingController _borrowedEmployeeIdController;
+  late TextEditingController _costController;
+  late TextEditingController _productIdController;
+  late String _selectedStatus;
 
   @override
   void initState() {
     super.initState();
-    _idController = TextEditingController(text: widget.id);
-    _nameController = TextEditingController(text: widget.name);
-    _categoryController = TextEditingController(text: widget.category);
-    _selectedType = widget.type;
+    // _partNumberController = TextEditingController(
+    //   text: widget.partNumber.toString(),
+    // );
+    // _partIdController = TextEditingController(text: widget.partId.toString());
+    _partNameController = TextEditingController(text: widget.partName);
+    // _borrowedEmployeeIdController = TextEditingController(
+    //   text: widget.borrowedEmployeeId.toString(),
+    // );
+    _costController = TextEditingController(text: widget.cost.toString());
+    _productIdController = TextEditingController(
+      text: widget.productId.toString(),
+    );
+    _selectedStatus = widget.status;
   }
 
   @override
   void dispose() {
-    _idController.dispose();
-    _nameController.dispose();
-    _categoryController.dispose();
+    // _partNumberController.dispose();
+    // _partIdController.dispose();
+    _partNameController.dispose();
+    // _borrowedEmployeeIdController.dispose();
+    _costController.dispose();
+    _productIdController.dispose();
     super.dispose();
   }
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       Navigator.pop(context, {
-        'id': _idController.text,
-        'name': _nameController.text,
-        'category': _categoryController.text,
-        'type': _selectedType,
+        'partNumber': int.parse(widget.partNumber.toString()),
+        'partId': int.parse(widget.partId.toString()),
+        'partName': _partNameController.text,
+        'borrowedEmployeeId': int.parse(widget.borrowedEmployeeId.toString()),
+        'status': _selectedStatus,
+        'cost': int.parse(_costController.text),
+        'productId': int.parse(_productIdController.text),
       });
     }
   }
@@ -69,15 +93,24 @@ class _EditPartPageState extends State<EditPartPage> {
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
-          child: Column(
+          child: ListView(
             children: [
-              _buildTextField(_idController, 'Part ID'),
+              // _buildNumberField(_partNumberController, 'Part Number'),
+              // const SizedBox(height: 16),
+              // _buildNumberField(_partIdController, 'Part ID'),
               const SizedBox(height: 16),
-              _buildTextField(_nameController, 'Part Name'),
+              _buildTextField(_partNameController, 'Part Name'),
+              // const SizedBox(height: 16),
+              // _buildNumberField(
+              //   _borrowedEmployeeIdController,
+              //   'Borrowed Employee ID',
+              // ),
               const SizedBox(height: 16),
-              _buildTextField(_categoryController, 'Category'),
+              _buildStatusDropdown(),
               const SizedBox(height: 16),
-              _buildTypeDropdown(),
+              _buildNumberField(_costController, 'Cost'),
+              const SizedBox(height: 16),
+              _buildNumberField(_productIdController, 'Product ID'),
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _submitForm,
@@ -126,16 +159,43 @@ class _EditPartPageState extends State<EditPartPage> {
     );
   }
 
-  Widget _buildTypeDropdown() {
+  Widget _buildNumberField(TextEditingController controller, String label) {
+    return TextFormField(
+      controller: controller,
+      style: const TextStyle(color: Colors.white),
+      keyboardType: TextInputType.number,
+      validator: (value) {
+        if (value!.isEmpty) return 'Please enter $label';
+        if (int.tryParse(value) == null) return 'Please enter a valid number';
+        return null;
+      },
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.grey),
+        filled: true,
+        fillColor: Colors.grey[900],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF7B544C), width: 1),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusDropdown() {
     return DropdownButtonFormField<String>(
-      value: _selectedType,
+      value: _selectedStatus,
       items:
-          ['Product', 'Part']
+          ['available', 'borrow-out']
               .map(
-                (type) => DropdownMenuItem(
-                  value: type,
+                (status) => DropdownMenuItem(
+                  value: status,
                   child: Text(
-                    type,
+                    status,
                     style: const TextStyle(color: Colors.white),
                   ),
                 ),
@@ -143,12 +203,12 @@ class _EditPartPageState extends State<EditPartPage> {
               .toList(),
       onChanged: (String? value) {
         if (value != null) {
-          setState(() => _selectedType = value);
+          setState(() => _selectedStatus = value);
         }
       },
       dropdownColor: Colors.grey[900],
       decoration: InputDecoration(
-        labelText: 'Type',
+        labelText: 'Status',
         labelStyle: const TextStyle(color: Colors.grey),
         filled: true,
         fillColor: Colors.grey[900],

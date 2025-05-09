@@ -3,6 +3,11 @@ import 'package:printing/printing.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import '../globals.dart' as globals;
+
 import 'add_parts.dart';
 import 'edit_part.dart';
 import 'history_page.dart';
@@ -18,19 +23,70 @@ class _PartManagementPageState extends State<PartManagementPage> {
   final TextEditingController searchController = TextEditingController();
   final List<Map<String, dynamic>> _operationHistory = [];
 
-  List<Map<String, String>> parts = [
-    {
-      'id': 'P001',
-      'name': 'Gearbox',
-      'category': 'Mechanical',
-      'type': 'Product',
-    },
-    {'id': 'P002', 'name': 'Sensor', 'category': 'Electronics', 'type': 'Part'},
-    {'id': 'P003', 'name': 'Valve', 'category': 'Hydraulics', 'type': 'Part'},
-  ];
+  List<Map<String, dynamic>> parts = [];
+  bool isLoading = true;
+  String errorMessage = '';
 
   String searchQuery = '';
   Set<int> expandedRows = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchParts();
+  }
+
+  Future<void> _fetchParts() async {
+    if (globals.token.isEmpty) {
+      print("No token found");
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+      errorMessage = '';
+    });
+
+    try {
+      final response = await http.get(
+        Uri.parse('http://4.227.176.4:8081/api/components'),
+        headers: {
+          'Authorization': globals.token,
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          parts =
+              data.map((item) {
+                return {
+                  'id': item['partId']?.toString() ?? '0',
+                  'partNumber': item['partNumber']?.toString() ?? '0',
+                  'name': item['partName'] ?? 'Unknown',
+                  'status': item['status'] ?? 'available',
+                  'cost': item['cost']?.toString() ?? '0',
+                  'productId': item['productId']?.toString() ?? '0',
+                  'borrowedEmployeeId':
+                      item['borrowedEmployeeId']?.toString() ?? '0',
+                };
+              }).toList();
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          errorMessage = 'Failed to load parts: ${response.statusCode}';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error fetching parts: $e';
+        isLoading = false;
+      });
+    }
+  }
 
   void _showHistory() async {
     final shouldClear = await Navigator.push(
@@ -136,7 +192,7 @@ class _PartManagementPageState extends State<PartManagementPage> {
         parts.where((item) {
           final query = searchQuery.toLowerCase();
           return item['name']!.toLowerCase().contains(query) ||
-              item['category']!.toLowerCase().contains(query) ||
+              item['status']!.toLowerCase().contains(query) ||
               item['id']!.contains(query);
         }).toList();
 
@@ -153,6 +209,10 @@ class _PartManagementPageState extends State<PartManagementPage> {
           IconButton(
             icon: const Icon(Icons.history, color: Colors.white),
             onPressed: _showHistory,
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            onPressed: _fetchParts,
           ),
         ],
       ),
@@ -179,120 +239,131 @@ class _PartManagementPageState extends State<PartManagementPage> {
             ),
             const SizedBox(height: 20),
 
-            Expanded(
-              child: ListView.builder(
-                itemCount: filteredParts.length,
-                itemBuilder: (context, index) {
-                  final part = filteredParts[index];
-                  final isExpanded = expandedRows.contains(index);
-                  return Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              part['id']!,
-                              style: const TextStyle(color: Colors.white),
+            if (isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (errorMessage.isNotEmpty)
+              Text(errorMessage, style: const TextStyle(color: Colors.red))
+            else if (parts.isEmpty)
+              const Text(
+                'No parts found',
+                style: TextStyle(color: Colors.white),
+              )
+            else
+              Expanded(
+                child: ListView.builder(
+                  itemCount: filteredParts.length,
+                  itemBuilder: (context, index) {
+                    final part = filteredParts[index];
+                    final isExpanded = expandedRows.contains(index);
+                    return Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                part['id']!,
+                                style: const TextStyle(color: Colors.white),
+                              ),
                             ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              part['name']!,
-                              style: const TextStyle(color: Colors.white),
+                            Expanded(
+                              child: Text(
+                                part['name']!,
+                                style: const TextStyle(color: Colors.white),
+                              ),
                             ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              part['type']!,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(
-                              isExpanded ? Icons.expand_less : Icons.more_vert,
-                              color: Colors.white70,
-                            ),
-                            onPressed:
-                                () => setState(() {
-                                  isExpanded
-                                      ? expandedRows.remove(index)
-                                      : expandedRows.add(index);
-                                }),
-                          ),
-                        ],
-                      ),
-                      if (isExpanded)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 12, bottom: 10),
-                          child: Row(
-                            children: [
-                              ElevatedButton(
-                                onPressed: () => _editPart(part, index),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orangeAccent,
-                                  foregroundColor: Colors.black,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                  ),
-                                ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.edit, size: 16),
-                                    SizedBox(width: 4),
-                                    Text('Edit'),
-                                  ],
+                            Expanded(
+                              child: Text(
+                                part['status']!,
+                                style: TextStyle(
+                                  color:
+                                      part['status'] == 'available'
+                                          ? Colors.green
+                                          : Colors.orange,
                                 ),
                               ),
-                              const SizedBox(width: 10),
-                              ElevatedButton(
-                                onPressed: () => _deletePart(index),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.redAccent,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                  ),
-                                ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.delete, size: 16),
-                                    SizedBox(width: 4),
-                                    Text('Delete'),
-                                  ],
-                                ),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                isExpanded
+                                    ? Icons.expand_less
+                                    : Icons.more_vert,
+                                color: Colors.white70,
                               ),
-                            ],
-                          ),
+                              onPressed:
+                                  () => setState(() {
+                                    isExpanded
+                                        ? expandedRows.remove(index)
+                                        : expandedRows.add(index);
+                                  }),
+                            ),
+                          ],
                         ),
-                      const Divider(color: Colors.grey),
-                    ],
-                  );
-                },
+                        if (isExpanded)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 12,
+                              bottom: 10,
+                            ),
+                            child: Row(
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () => _editPart(part, index),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.orangeAccent,
+                                    foregroundColor: Colors.black,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                    ),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.edit, size: 16),
+                                      SizedBox(width: 4),
+                                      Text('Edit'),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                ElevatedButton(
+                                  onPressed: () => _deletePart(index),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.redAccent,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                    ),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.delete, size: 16),
+                                      SizedBox(width: 4),
+                                      Text('Delete'),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        const Divider(color: Colors.grey),
+                      ],
+                    );
+                  },
+                ),
               ),
-            ),
 
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () async {
-                      final newPart = await Navigator.push(
+                    onPressed: () {
+                      Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const AddPartPage()),
-                      );
-                      if (newPart != null) {
-                        setState(() {
-                          parts.add(newPart);
-                          _operationHistory.add({
-                            'action': 'Added part',
-                            'details': '${newPart['id']} (${newPart['name']})',
-                            'timestamp': DateTime.now().toString(),
-                            'params': newPart,
-                          });
-                        });
-                      }
+                      ).then((_) {
+                        _fetchParts();
+                      });
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF7B544C),
@@ -338,41 +409,129 @@ class _PartManagementPageState extends State<PartManagementPage> {
     );
   }
 
-  void _editPart(Map<String, String> part, int index) async {
+  void _editPart(Map<String, dynamic> part, int index) async {
     final editedPart = await Navigator.push(
       context,
       MaterialPageRoute(
         builder:
             (_) => EditPartPage(
-              id: part['id']!,
-              name: part['name']!,
-              category: part['category']!,
-              type: part['type']!,
+              partNumber: int.tryParse(part['partNumber'] ?? '') ?? 0,
+              partId: int.tryParse(part['id'] ?? '') ?? 0,
+              partName: part['name'] ?? '',
+              borrowedEmployeeId:
+                  int.tryParse(part['borrowedEmployeeId'] ?? '') ?? 0,
+              status: part['status'] ?? 'available',
+              cost: int.tryParse(part['cost'] ?? '') ?? 0,
+              productId: int.tryParse(part['productId'] ?? '') ?? 0,
             ),
       ),
     );
 
     if (editedPart != null) {
-      setState(() {
-        parts[index] = editedPart;
-        _operationHistory.add({
-          'action': 'Edited part',
-          'details': 'Edited ${part['id']}',
-          'timestamp': DateTime.now().toString(),
+      try {
+        setState(() {
+          isLoading = true;
         });
-      });
+
+        final response = await http.put(
+          Uri.parse('http://4.227.176.4:8081/api/components/${part['id']}'),
+          headers: {
+            'Authorization': globals.token,
+            'Content-Type': 'application/json',
+          },
+          body: json.encode({
+            'partNumber': editedPart['partNumber'],
+            'partId': editedPart['partId'],
+            'partName': editedPart['partName'],
+            'borrowedEmployeeId':
+                editedPart['borrowedEmployeeId'] == 0
+                    ? null
+                    : editedPart['borrowedEmployeeId'],
+            'status': editedPart['status'],
+            'cost': editedPart['cost'],
+            'productId': editedPart['productId'],
+          }),
+        );
+
+        setState(() {
+          isLoading = false;
+        });
+
+        if (response.statusCode == 200) {
+          // Update the local state with the edited part
+          setState(() {
+            parts[index] = {
+              'id': editedPart['partId'].toString(),
+              'partNumber': editedPart['partNumber'].toString(),
+              'name': editedPart['partName'],
+              'status': editedPart['status'],
+              'cost': editedPart['cost'].toString(),
+              'productId': editedPart['productId'].toString(),
+              'borrowedEmployeeId': editedPart['borrowedEmployeeId'].toString(),
+            };
+          });
+
+          // Add to operation history
+          _operationHistory.add({
+            'action': 'Edited part',
+            'details': 'Edited ${part['id']}',
+            'timestamp': DateTime.now().toString(),
+            'newData': editedPart,
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Part updated successfully')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to update part: ${response.statusCode}'),
+            ),
+          );
+          print('Response body: ${response.body}');
+        }
+      } catch (e) {
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error updating part: $e')));
+      }
     }
   }
 
-  void _deletePart(int index) {
-    setState(() {
-      final deletedPart = parts.removeAt(index);
-      _operationHistory.add({
-        'action': 'Deleted part',
-        'details': 'Deleted ${deletedPart['id']}',
-        'timestamp': DateTime.now().toString(),
-      });
-    });
+  void _deletePart(int index) async {
+    final partToDelete = parts[index];
+    try {
+      final response = await http.delete(
+        Uri.parse(
+          'http://4.227.176.4:8081/api/components/${partToDelete['id']}',
+        ),
+        headers: {
+          'Authorization': globals.token, // Include JWT in header
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        setState(() {
+          parts.removeAt(index);
+          _operationHistory.add({
+            'action': 'Deleted part',
+            'details': 'Deleted ${partToDelete['id']}',
+            'timestamp': DateTime.now().toString(),
+          });
+        });
+      } else {
+        print(response.statusCode);
+        throw Exception('Failed to delete part');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error deleting part: $e')));
+    }
   }
 }
 

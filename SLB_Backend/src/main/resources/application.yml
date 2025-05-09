@@ -1,0 +1,19 @@
+lot:
+  jwt:
+    secret-key: LoTBackEndSecurityKeyUsedForAuthorization
+    ttl: 7200000
+    token-name: Authorization
+spring:
+  datasource:
+    hikari:
+      max-lifetime: 1800000
+      idle-timeout: 600000
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://4.227.176.4/slb_db}
+    username: ${SPRING_DATASOURCE_USERNAME:slb_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:slb123456}
+    driver-class-name: org.postgresql.Driver
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+    default-enum-type-handler: org.apache.ibatis.type.EnumTypeHandler

@@ -89,7 +89,7 @@ class _CheckInPageState extends State<CheckInPage> {
     });
 
     try {
-      final url = Uri.parse('http://172.191.111.81:8081/api/activities/borrow');
+      final url = Uri.parse('http://4.227.176.4:8081/api/activities/borrow');
       final response = await http.post(
         url,
         headers: {
@@ -140,7 +140,7 @@ class _CheckInPageState extends State<CheckInPage> {
     });
 
     try {
-      final url = Uri.parse('http://172.191.111.81:8081/api/activities/return');
+      final url = Uri.parse('http://4.227.176.4:8081/api/activities/return');
       final response = await http.post(
         url,
         headers: {
